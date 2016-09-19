@@ -1,10 +1,12 @@
-{
-	// See http://go.microsoft.com/fwlink/?LinkId=733558
-	// for the documentation about the tasks.json format
+{	
 	"version": "0.1.0",
-	"command": "tsc",
+	"command": "C:\\Development\\node\\events_cli\\node_modules\\tsc\\bin\\tsc",
 	"isShellCommand": true,
-	"args": ["-p", "HelloWorld.ts"],
+	"args": ["--module commonjs -target es6", "app-main.ts"],
+	"windows": {
+		"command": "C:\\Development\\node\\events_cli\\node_modules\\tsc\\bin\\tsc",
+		"isShellCommand": true
+	},
 	"showOutput": "silent",
 	"problemMatcher": "$tsc"
 }

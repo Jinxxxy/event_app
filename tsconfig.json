@@ -4,4 +4,10 @@
         "module": "commonjs",
         "sourceMap": true
     }
+    /*"files":[
+        "sql_func.ts",
+        "event_class.ts",
+        "misc_func.ts",
+        "prompt_func.ts"
+    ]*/
 }
