@@ -1,12 +1,13 @@
 ///<reference path="event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 
 import event_class from './event_class'
 import sql_func from './sql_func'
 import main_menu from './main-menu'
 import query_builders from './query-builders'
+import string_functions from './string_functions'
+import output_functions from './output_functions'
 declare function require(name: string);
 
 class edit{
@@ -51,7 +52,7 @@ class edit{
                 var in_date: string = results['Leave blank for no change: Date - dd/mm/yyyy'];
                 var in_type: string = results['Leave blank for no change: Type(Birthday, Anniversary, Event)'];
                 var in_notes: string = results['Leave blank for no change: Notes'];
-                var in_recurring: number = misc_func.string_to_number_bool(results['Leave blank for no change: Recurring event? (Y/N)']); 
+                var in_recurring: number = string_functions.string_to_number_bool(results['Leave blank for no change: Recurring event? (Y/N)']); 
                 if(in_date !== ""){
                     curr_event.date = in_date;
                 }
@@ -64,9 +65,7 @@ class edit{
                 if(in_recurring.toString() !== ""){
                     curr_event.recurring = in_recurring;
                 }
-                console.log(curr_event);
                 var ret_prom = sql_func.update_event(query_builders.update_query_builder(curr_event)).then(function(out_string){
-                    console.log(out_string);
                     main_menu.mainmenu();
                 });                
             })
@@ -80,10 +79,10 @@ class edit{
                 var ret_prom = sql_func.general_query("SELECT * FROM devbox.events_data WHERE idkey = " + results['Event ID: (Please find before editing)']);
                 ret_prom.then(function(sql_res){
                     if(Object.keys(sql_res).length < 1){
-                        misc_func.console_log("No record found! Please check ID");
+                        output_functions.console_log("No record found! Please check ID");
                         main_menu.mainmenu();
                     } else {                      
-                        misc_func.output_event(sql_res[0]);                  
+                        console.log(output_functions.output_event(sql_res[0]));                  
                         edit.main_edit_event(sql_res[0]);
                     }
                 })

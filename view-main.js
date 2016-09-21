@@ -1,12 +1,12 @@
 ///<reference path="event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 "use strict";
 const sql_func_1 = require('./sql_func');
-const misc_func_1 = require('./misc_func');
 const main_menu_1 = require('./main-menu');
-const check_main_1 = require('./check-main');
+const output_functions_1 = require('./output_functions');
+const date_functions_1 = require('./date_functions');
+const export_html_1 = require('./export-html');
 var schema_object = {
     properties: {
         'Select date dd/mm/yyyy': {
@@ -25,14 +25,15 @@ class view_main {
                 if (result['Select date dd/mm/yyyy'].toLowerCase() === "all") {
                     var ret_prom = sql_func_1.default.general_query("SELECT * FROM devbox.events_data;");
                     ret_prom.then(function (cls_arr) {
-                        check_main_1.default.print_results(cls_arr);
+                        output_functions_1.default.print_result_cards(cls_arr);
+                        export_html_1.default.export_main(cls_arr);
                         return;
                     }).then(function () {
                         main_menu_1.default.mainmenu();
                     });
                 }
                 else {
-                    var date_string = misc_func_1.default.dateparser(result['Select date dd/mm/yyyy']);
+                    var date_string = date_functions_1.default.dateparser(result['Select date dd/mm/yyyy']);
                     that._date = date_string;
                     resolve(date_string);
                 }
@@ -42,7 +43,7 @@ class view_main {
             var ret_prom = sql_func_1.default.retrieve_by_date(str);
             ret_prom.then(function (res_arr) {
                 for (var x in res_arr) {
-                    console.log(misc_func_1.default.output_event(res_arr[x]));
+                    console.log(output_functions_1.default.output_event(res_arr[x]));
                 }
                 return;
             }).then(function () {

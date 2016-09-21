@@ -1,12 +1,11 @@
 ///<reference path="event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 "use strict";
 const sql_func_1 = require('./sql_func');
-const misc_func_1 = require('./misc_func');
 const main_menu_1 = require('./main-menu');
 const query_builders_1 = require('./query-builders');
+const output_functions_1 = require('./output_functions');
 class delete_main {
     static main() {
         var prompt = require('prompt');
@@ -25,7 +24,7 @@ class delete_main {
                 });
             });
         }).then(function (answer) {
-            misc_func_1.default.console_log("Record " + answer + " has been deleted");
+            output_functions_1.default.console_log("Record " + answer + " has been deleted");
             main_menu_1.default.mainmenu();
         });
     }

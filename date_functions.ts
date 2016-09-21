@@ -30,3 +30,4 @@ class date_fnc{
         return return_string;
     } 
 }
+export default date_fnc;

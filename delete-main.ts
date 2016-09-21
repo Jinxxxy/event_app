@@ -1,12 +1,12 @@
 ///<reference path="event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 
 import event_class from './event_class'
 import sql_func from './sql_func'
 import main_menu from './main-menu'
 import query_builders from './query-builders'
+import output_functions from './output_functions'
 declare function require(name: string);
 
 class delete_main{
@@ -36,7 +36,7 @@ class delete_main{
                 })
             })    
         }).then(function(answer){
-            misc_func.console_log("Record " + answer + " has been deleted");
+            output_functions.console_log("Record " + answer + " has been deleted");
             main_menu.mainmenu();
         })
         

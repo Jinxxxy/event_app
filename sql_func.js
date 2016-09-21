@@ -1,6 +1,8 @@
 "use strict";
 const event_class_1 = require('./event_class');
-const misc_func_1 = require('./misc_func');
+const main_menu_1 = require('./main-menu');
+const output_functions_1 = require('./output_functions');
+const date_functions_1 = require('./date_functions');
 var mysql = require('mysql');
 class sql_func {
     static result_to_array(result_arr, cb) {
@@ -9,7 +11,7 @@ class sql_func {
         if (Object.keys(result_arr).length > 0) {
             for (var x in result_arr) {
                 output_arr.push(result_arr[x]);
-                var date_var = misc_func_1.default.date_to_date_string(result_arr[x]['dateandtime']);
+                var date_var = date_functions_1.default.date_to_date_string(result_arr[x]['dateandtime']);
                 var tmp_cls = new event_class_1.default(date_var, result_arr[x]['type'], result_arr[x]['notes'], result_arr[x]['recurring'], result_arr[x]['idkey']);
                 class_arr.push(tmp_cls);
             }
@@ -17,9 +19,7 @@ class sql_func {
         }
         else if (Object.keys(result_arr).length === 0) {
             console.log("No results to return. Please check parameters");
-            if (cb) {
-                cb();
-            }
+            main_menu_1.default.mainmenu();
         }
         else {
             console.log("Something went wront, please restart");
@@ -38,7 +38,7 @@ class sql_func {
         var connection = this.create_connection();
         var prom = new Promise(function (resolve, reject) {
             connection.query("SELECT * FROM devbox.events_data WHERE dateandtime = " + date + " ;", function (err, results) {
-                misc_func_1.default.console_log("Results");
+                output_functions_1.default.console_log("Results");
                 console.log("Results: " + Object.keys(results).length + " entries for the specified date");
                 var cls_arr = sql_func.result_to_array(results);
                 resolve(cls_arr);
@@ -89,7 +89,7 @@ class sql_func {
             else {
                 connection.end(function (err) { });
                 console.log("The following was added: ");
-                console.log(misc_func_1.default.output_event(sql_func.result_to_array(result)[0]));
+                console.log(output_functions_1.default.output_event(sql_func.result_to_array(result)[0]));
                 if (cb) {
                     cb();
                 }

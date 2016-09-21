@@ -1,6 +1,5 @@
 ///<reference path="./event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 ///<reference path="./add-main.ts" />
 ///<reference path="./view-main.ts" />
@@ -13,6 +12,7 @@ import view_main from './view-main'
 import check_func from './check-main'
 import edit from './edit_main'
 import delete_main from './delete-main'
+import output_functions from './output_functions'
 
 declare function require(name: string);
 //adding to console prototype
@@ -31,7 +31,7 @@ var schema_object_add = {
 export default class main_menu{
     public static mainmenu(): void{
         var prompt_add = require('prompt');
-        misc_func.console_log("Program Open");
+        output_functions.console_log("Program Open");
         var prom_add = new Promise(function(res, rej){
             prompt_add.get(schema_object_add, function(err, result){
                 var result = result['What would you like to do? (check today (check), add, edit, delete, view, exit)'];
@@ -41,26 +41,26 @@ export default class main_menu{
         }).then(function(val){
             switch (val){
                     case "ADD":
-                    misc_func.console_log(val);
+                    output_functions.console_log(val);
                     Startup.main();
                     break;
                     case "EDIT":
-                    misc_func.console_log(val);
+                    output_functions.console_log(val);
                     edit.main_pick_event();
                     break;
                     case "DELETE":
-                    misc_func.console_log(val);
+                    output_functions.console_log(val);
                     delete_main.main();
                     break;                    
                     case "VIEW":
-                    misc_func.console_log(val);
+                    output_functions.console_log(val);
                     view_main.main();
                     break;
                     case "EXIT":
-                    misc_func.console_log("Goodbye!");
+                    output_functions.console_log("Goodbye!");
                     break;
                     case "CHECK":
-                    misc_func.console_log(val);
+                    output_functions.console_log(val);
                     check_func.check_menu();
                     break;
                     default:

@@ -1,12 +1,13 @@
 ///<reference path="event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 
 import event_class from './event_class'
 import sql_func from './sql_func'
 import main_menu from './main-menu'
 import query_builders from './query-builders'
+import output_functions from './output_functions'
+import exp_html from './export-html'
 declare function require(name: string);
 
 var schema_object = {
@@ -24,7 +25,7 @@ class week{
             var ret_prom = sql_func.general_query(query_builders.week_query_builder())
             
             ret_prom.then(function(arr_obj){
-                check_func.print_results(arr_obj, resolve);
+                output_functions.print_result_cards(arr_obj, resolve);
             })
             
         }).then(function(){
@@ -37,7 +38,7 @@ class day{
         var prom = new Promise(function(resolve, reject){
             var ret_prom = sql_func.general_query(query_builders.day_query_builder());
             ret_prom.then(function(arr_obj){
-                check_func.print_results(arr_obj, resolve);
+                output_functions.print_result_cards(arr_obj, resolve);
             })
         }).then(function(){
             main_menu.mainmenu();
@@ -48,10 +49,11 @@ class month{
     public static month_get(){
         var prom = new Promise(function(resolve, reject){
             var ret_prom = sql_func.general_query(query_builders.month_query_builder());
-            ret_prom.then(function(arr_obj){
-                check_func.print_results(arr_obj, resolve);
+            ret_prom.then(function(arr_obj){                
+                output_functions.print_result_cards(arr_obj, resolve);
             })
         }).then(function(){
+            
             main_menu.mainmenu();
         })
     }

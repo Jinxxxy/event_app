@@ -1,12 +1,12 @@
 ///<reference path="./event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 
 declare function require(name: string);
 import event_class from './event_class'
 import sql_func from './sql_func'
 import mainmenu from './main-menu'
+import date_fnc from './date_functions'
 
 // resolve issue to export schema_objects to a separate class file
 var schema_objects = {
@@ -52,7 +52,7 @@ export default class Startup {
                     console.log("Failed");
                     return 0;
                 }
-                var curr = new event_class(misc_func.dateparser(result['Date(dd-mm-yyyy)']), result['Type(Birthday, Anniversary, Event)'], result['Notes'], event_class.recurring_conv(result['Recurring event? (Y/N)']));
+                var curr = new event_class(date_fnc.dateparser(result['Date(dd-mm-yyyy)']), result['Type(Birthday, Anniversary, Event)'], result['Notes'], event_class.recurring_conv(result['Recurring event? (Y/N)']));
                 console.log(curr);
                 that.res_data = curr;
                 resolve();

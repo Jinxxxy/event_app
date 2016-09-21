@@ -1,9 +1,10 @@
 import event_class from './event_class'
+import date_functions from './date_functions'
 
 class query_builders{
     public static update_query_builder(upd_eve: event_class): string{
         var pre_string: string = "UPDATE devbox.events_data SET ";
-        var add_date: string = "dateandtime = " + misc_func.dateparser(upd_eve.date) + ", ";
+        var add_date: string = "dateandtime = " + date_functions.dateparser(upd_eve.date) + ", ";
         var add_type: string = "type = '" + upd_eve.type + "', ";
         var add_notes: string = "notes = '" + upd_eve.notes + "', ";
         var add_recurring: string = "recurring = " + upd_eve.recurring;
@@ -16,14 +17,14 @@ class query_builders{
     }
     public static week_query_builder(): string{
         var orig_date: Date = new Date();
-        var pre_month: string = misc_func.single_date_to_double_date(orig_date.getMonth() + 1);
-        var pre_date: string = misc_func.single_date_to_double_date(orig_date.getDate());
+        var pre_month: string = date_functions.single_date_to_double_date(orig_date.getMonth() + 1);
+        var pre_date: string = date_functions.single_date_to_double_date(orig_date.getDate());
         var full_pre_string = orig_date.getFullYear().toString() + pre_month + pre_date;
         
         orig_date.setDate(orig_date.getDate() + 7);
         
-        var post_month: string = misc_func.single_date_to_double_date(orig_date.getMonth() + 1);
-        var post_date: string = misc_func.single_date_to_double_date(orig_date.getDate());
+        var post_month: string = date_functions.single_date_to_double_date(orig_date.getMonth() + 1);
+        var post_date: string = date_functions.single_date_to_double_date(orig_date.getDate());
         var full_post_string: string = orig_date.getFullYear().toString() + post_month + post_date;
         
         var pre_string: string = `
@@ -39,8 +40,8 @@ class query_builders{
     public static day_query_builder(): string{
         var query_string: string = "";
         var now_date: Date = new Date();
-        var dd: string = misc_func.single_date_to_double_date(now_date.getDate());
-        var mm: string = misc_func.single_date_to_double_date(now_date.getMonth() + 1);
+        var dd: string = date_functions.single_date_to_double_date(now_date.getDate());
+        var mm: string = date_functions.single_date_to_double_date(now_date.getMonth() + 1);
         var yyyy: string = now_date.getFullYear().toString();
         
         query_string = yyyy + mm + dd;
@@ -55,12 +56,12 @@ class query_builders{
     }
     public static month_query_builder(){
         var orig_date = new Date();
-        var orig_string = orig_date.getFullYear().toString() + misc_func.single_date_to_double_date(((orig_date.getMonth() + 1))) + orig_date.getDate().toString();
-        var start_month: string = misc_func.single_date_to_double_date(orig_date.getMonth() + 1);
-        var end_month: string = misc_func.single_date_to_double_date(orig_date.getMonth() + 2);
+        var orig_string = orig_date.getFullYear().toString() + date_functions.single_date_to_double_date(((orig_date.getMonth() + 1))) + orig_date.getDate().toString();
+        var start_month: string = date_functions.single_date_to_double_date(orig_date.getMonth() + 1);
+        var end_month: string = date_functions.single_date_to_double_date(orig_date.getMonth() + 2);
         var day_val: string = orig_date.getDate().toString();
         orig_date.setMonth(orig_date.getMonth() + 2);        
-        var out_string = orig_date.getFullYear().toString() + misc_func.single_date_to_double_date(orig_date.getMonth()) + orig_date.getDate().toString();        
+        var out_string = orig_date.getFullYear().toString() + date_functions.single_date_to_double_date(orig_date.getMonth()) + orig_date.getDate().toString();        
                 
         var pre_string: string = `
         SELECT * FROM devbox.events_data WHERE         

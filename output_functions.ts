@@ -1,4 +1,5 @@
 import event_class from './event_class';
+import string_functions from './string_functions'
 
 class output_functions{
     public static print_result_cards(res_arr: Array<event_class>, cb?: Function): void{
@@ -29,7 +30,7 @@ class output_functions{
         var type_string: string = "Type: " + selected_item.type;
         var notes_string: string = "Notes: " + selected_item.notes;        
         str_arr.push(id_string, date_string, type_string, notes_string);
-        var box_size:number = (misc_func.find_longest_string(str_arr).length + 2);
+        var box_size:number = (string_functions.find_longest_string(str_arr).length + 2);
         var border: string = "---";
         var i: number = 0;
         while(i < box_size){

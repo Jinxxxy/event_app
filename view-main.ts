@@ -1,13 +1,14 @@
 ///<reference path="event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 
 import event_class from './event_class'
 import sql_func from './sql_func'
 import main_menu from './main-menu'
 import check_main from './check-main'
-import output_functions from './output_functions';
+import output_functions from './output_functions'
+import date_fnc from './date_functions'
+import exp_html from './export-html'
 declare function require(name: string);
 var schema_object = {
     properties:{
@@ -29,13 +30,14 @@ class view_main{
                 if(result['Select date dd/mm/yyyy'].toLowerCase() === "all"){
                    var ret_prom:Promise<Array<event_class>> = sql_func.general_query("SELECT * FROM devbox.events_data;");
                    ret_prom.then(function(cls_arr){
-                       output_functions. (cls_arr);
+                       output_functions.print_result_cards(cls_arr);
+                       exp_html.export_main(cls_arr)
                        return;
                    }).then(function(){
                        main_menu.mainmenu();
                    })
                 } else {
-                    var date_string: string = misc_func.dateparser(result['Select date dd/mm/yyyy']);
+                    var date_string: string = date_fnc.dateparser(result['Select date dd/mm/yyyy']);
                     that._date = date_string;
                     resolve(date_string)
                 }
@@ -45,7 +47,7 @@ class view_main{
             var ret_prom: Promise<Array<event_class>> = sql_func.retrieve_by_date(str);
             ret_prom.then(function(res_arr){
                 for(var x in res_arr){
-                    console.log(misc_func.output_event(res_arr[x]))
+                    console.log(output_functions.output_event(res_arr[x]))
                 }
                 return;
             }).then(function(){

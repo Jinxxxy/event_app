@@ -1,12 +1,11 @@
 ///<reference path="./event_class.ts" />
 ///<reference path="./sql_func.ts" />
-///<reference path="./misc_func.ts" />
 ///<reference path="./prompt_func.ts" />
 "use strict";
 const event_class_1 = require('./event_class');
 const sql_func_1 = require('./sql_func');
-const misc_func_1 = require('./misc_func');
 const main_menu_1 = require('./main-menu');
+const date_functions_1 = require('./date_functions');
 // resolve issue to export schema_objects to a separate class file
 var schema_objects = {
     'add-new': {
@@ -47,7 +46,7 @@ class Startup {
                     console.log("Failed");
                     return 0;
                 }
-                var curr = new event_class_1.default(misc_func_1.default.dateparser(result['Date(dd-mm-yyyy)']), result['Type(Birthday, Anniversary, Event)'], result['Notes'], event_class_1.default.recurring_conv(result['Recurring event? (Y/N)']));
+                var curr = new event_class_1.default(date_functions_1.default.dateparser(result['Date(dd-mm-yyyy)']), result['Type(Birthday, Anniversary, Event)'], result['Notes'], event_class_1.default.recurring_conv(result['Recurring event? (Y/N)']));
                 console.log(curr);
                 that.res_data = curr;
                 resolve();

@@ -1,6 +1,8 @@
 declare function require(name: string);
 import event_class from './event_class'
 import mainmenu from './main-menu'
+import output_functions from './output_functions'
+import date_functions from './date_functions'
 
 var mysql = require('mysql');
 
@@ -12,7 +14,7 @@ export default class sql_func{
         if(Object.keys(result_arr).length    > 0){
             for(var x in result_arr){
                 output_arr.push(result_arr[x])
-                var date_var = misc_func.date_to_date_string(result_arr[x]['dateandtime']); 
+                var date_var = date_functions.date_to_date_string(result_arr[x]['dateandtime']); 
                 var tmp_cls = new event_class(
                     date_var,
                     result_arr[x]['type'],
@@ -25,9 +27,7 @@ export default class sql_func{
             return class_arr;
         } else if(Object.keys(result_arr).length === 0) {
             console.log("No results to return. Please check parameters");
-            if(cb){
-                cb();
-            }
+            mainmenu.mainmenu();
         } else {
             console.log("Something went wront, please restart");
         }
@@ -46,7 +46,7 @@ export default class sql_func{
         var connection = this.create_connection();
         var prom = new Promise(function(resolve, reject){
             connection.query("SELECT * FROM devbox.events_data WHERE dateandtime = " + date + " ;", function(err, results){
-                misc_func.console_log("Results");
+                output_functions.console_log("Results");
                 console.log("Results: " + Object.keys(results).length + " entries for the specified date");
                 var cls_arr: Array<event_class> = sql_func.result_to_array(results);
                 resolve(cls_arr)
@@ -98,7 +98,7 @@ export default class sql_func{
             } else {                            
                 connection.end(function(err){});
                 console.log("The following was added: ")
-                console.log(misc_func.output_event(sql_func.result_to_array(result)[0]));
+                console.log(output_functions.output_event(sql_func.result_to_array(result)[0]));
                 if(cb){
                     cb();
                 }
