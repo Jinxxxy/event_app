@@ -5,47 +5,48 @@
 
 import event_class from './event_class'
 import sql_func from './sql_func'
-import misc_func from './misc_func'
 import main_menu from './main-menu'
+import query_builders from './query-builders'
 declare function require(name: string);
 
 class edit{
     public static pick_prompt_schema = {
         properties:{
             'Event ID: (Please find before editing)':{
-                pattern: /^[0-9]{0,3}$/,
+                pattern: /^[0-9]{0,4}$/,
                 message: 'Please enter the event ID',
                 required: true
             }
         }
-    }
+    }   
+    
     public static edit_event_schema = {
-        properties:{
+        properties:{            
             'Leave blank for no change: Date - dd/mm/yyyy':{
-                pattern: /^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$/,
+                pattern: /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/,
                 message: 'Please enter date as dd/mm/yyyy',
-                required: true,
+                //required: true,
             },
             'Leave blank for no change: Type(Birthday, Anniversary, Event)':{
                 pattern: 'birthday|anniversary|event',
                 message: 'Please enter either "birthday","anniversay" or "event"',
-                required: true,
+                //required: true,
             },
             'Leave blank for no change: Notes':{
                 pattern: /^[a-zA-Z0-9 ]{0,1000}$/,
                 message: 'Only letters numbers and spaces can be used. Must be no more than 1000 characters',
-                required: true
+                //required: true
             },
             'Leave blank for no change: Recurring event? (Y/N)':{
                 pattern: /y|Y|n|N/,
                 message: 'Only y / n are accepted',
-                required: true
+                //required: true
             }            
         }
     }
     public static main_edit_event(curr_event: event_class){
         var prompt = require('prompt');
-        var prom = new Promise(function(resolve, reject){
+        var prom = new Promise(function(resolve, reject){            
             prompt.get(edit.edit_event_schema, function(err, results){
                 var in_date: string = results['Leave blank for no change: Date - dd/mm/yyyy'];
                 var in_type: string = results['Leave blank for no change: Type(Birthday, Anniversary, Event)'];
@@ -64,11 +65,12 @@ class edit{
                     curr_event.recurring = in_recurring;
                 }
                 console.log(curr_event);
-                var ret_prom = sql_func.update_event(sql_func.update_query_builder(curr_event)).then(function(out_string){
+                var ret_prom = sql_func.update_event(query_builders.update_query_builder(curr_event)).then(function(out_string){
                     console.log(out_string);
                     main_menu.mainmenu();
-                });
+                });                
             })
+            
         })
     }
     public static main_pick_event(){
@@ -76,9 +78,14 @@ class edit{
         var prom = new Promise(function(resolve, reject){
             prompt.get(edit.pick_prompt_schema, function(err, results){
                 var ret_prom = sql_func.general_query("SELECT * FROM devbox.events_data WHERE idkey = " + results['Event ID: (Please find before editing)']);
-                ret_prom.then(function(sql_res){                      
-                    misc_func.output_event(sql_res[0]);                  
-                    edit.main_edit_event(sql_res[0]);
+                ret_prom.then(function(sql_res){
+                    if(Object.keys(sql_res).length < 1){
+                        misc_func.console_log("No record found! Please check ID");
+                        main_menu.mainmenu();
+                    } else {                      
+                        misc_func.output_event(sql_res[0]);                  
+                        edit.main_edit_event(sql_res[0]);
+                    }
                 })
             })
         })

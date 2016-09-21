@@ -3,7 +3,7 @@ const event_class_1 = require('./event_class');
 const misc_func_1 = require('./misc_func');
 var mysql = require('mysql');
 class sql_func {
-    static result_to_array(result_arr) {
+    static result_to_array(result_arr, cb) {
         var output_arr = [];
         var class_arr = [];
         if (Object.keys(result_arr).length > 0) {
@@ -16,7 +16,10 @@ class sql_func {
             return class_arr;
         }
         else if (Object.keys(result_arr).length === 0) {
-            console.log("No results to return");
+            console.log("No results to return. Please check parameters");
+            if (cb) {
+                cb();
+            }
         }
         else {
             console.log("Something went wront, please restart");
@@ -33,11 +36,16 @@ class sql_func {
     }
     static retrieve_by_date(date, cb) {
         var connection = this.create_connection();
-        connection.query("SELECT * FROM devbox.events_data WHERE dateandtime = " + date + " ;", function (err, results) {
-            console.log("results: " + Object.keys(results).length + "entries for the specified date");
-            cb();
-            return;
+        var prom = new Promise(function (resolve, reject) {
+            connection.query("SELECT * FROM devbox.events_data WHERE dateandtime = " + date + " ;", function (err, results) {
+                misc_func_1.default.console_log("Results");
+                console.log("Results: " + Object.keys(results).length + " entries for the specified date");
+                var cls_arr = sql_func.result_to_array(results);
+                resolve(cls_arr);
+            });
         });
+        return prom;
+        ;
     }
     static retrieve() {
         var connection = this.create_connection();
@@ -81,7 +89,7 @@ class sql_func {
             else {
                 connection.end(function (err) { });
                 console.log("The following was added: ");
-                console.log(misc_func_1.default.output_event(result));
+                console.log(misc_func_1.default.output_event(sql_func.result_to_array(result)[0]));
                 if (cb) {
                     cb();
                 }
@@ -89,7 +97,7 @@ class sql_func {
             }
         });
     }
-    static general_query(query, cb) {
+    static general_query(query) {
         var connection = this.create_connection();
         var output = [];
         var prom = new Promise(function (resolve, reject) {
@@ -105,16 +113,6 @@ class sql_func {
         });
         return prom;
     }
-    static update_query_builder(upd_eve) {
-        var pre_string = "UPDATE devbox.events_data SET ";
-        var add_date = "dateandtime = " + misc_func_1.default.dateparser(upd_eve.date) + ", ";
-        var add_type = "type = '" + upd_eve.type + "', ";
-        var add_notes = "notes = '" + upd_eve.notes + "', ";
-        var add_recurring = "recurring = " + upd_eve.recurring;
-        var end_string = " WHERE idkey = " + upd_eve.id;
-        var output_string = pre_string + add_date + add_type + add_notes + add_recurring + end_string;
-        return output_string;
-    }
     static update_event(upd_string) {
         var conn = sql_func.create_connection();
         var prom = new Promise(function (resolve, reject) {
@@ -124,6 +122,20 @@ class sql_func {
                 }
                 else {
                     resolve(result['message']);
+                }
+            });
+        });
+        return prom;
+    }
+    static void_return_query(query) {
+        var conn = sql_func.create_connection();
+        var prom = new Promise(function (resolve, reject) {
+            conn.query(query, function (err, result) {
+                if (err) {
+                    resolve(result);
+                }
+                else {
+                    resolve(result);
                 }
             });
         });

@@ -6,11 +6,12 @@
 const sql_func_1 = require('./sql_func');
 const misc_func_1 = require('./misc_func');
 const main_menu_1 = require('./main-menu');
+const check_main_1 = require('./check-main');
 var schema_object = {
     properties: {
         'Select date dd/mm/yyyy': {
-            pattern: /^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$/,
-            message: 'Please enter date as dd/mm/yyyy',
+            pattern: /^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$|all/,
+            message: 'Please enter date as dd/mm/yyyy (`all` for all)',
             required: true
         }
     }
@@ -21,13 +22,32 @@ class view_main {
         var prompt = require('prompt');
         var prom_ret = new Promise(function (resolve, reject) {
             prompt.get(schema_object, function (err, result) {
-                var date_string = misc_func_1.default.dateparser(result['Select date dd/mm/yyyy']);
-                that._date = date_string;
-                resolve(date_string);
+                if (result['Select date dd/mm/yyyy'].toLowerCase() === "all") {
+                    var ret_prom = sql_func_1.default.general_query("SELECT * FROM devbox.events_data;");
+                    ret_prom.then(function (cls_arr) {
+                        check_main_1.default.print_results(cls_arr);
+                        return;
+                    }).then(function () {
+                        main_menu_1.default.mainmenu();
+                    });
+                }
+                else {
+                    var date_string = misc_func_1.default.dateparser(result['Select date dd/mm/yyyy']);
+                    that._date = date_string;
+                    resolve(date_string);
+                }
             });
         }).then(function (renamed) {
             var str = renamed.toString();
-            sql_func_1.default.retrieve_by_date(str, main_menu_1.default.mainmenu);
+            var ret_prom = sql_func_1.default.retrieve_by_date(str);
+            ret_prom.then(function (res_arr) {
+                for (var x in res_arr) {
+                    console.log(misc_func_1.default.output_event(res_arr[x]));
+                }
+                return;
+            }).then(function () {
+                main_menu_1.default.mainmenu();
+            });
         });
     }
 }

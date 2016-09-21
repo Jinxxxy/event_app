@@ -5,14 +5,15 @@
 
 import event_class from './event_class'
 import sql_func from './sql_func'
-import misc_func from './misc_func'
 import main_menu from './main-menu'
+import check_main from './check-main'
+import output_functions from './output_functions';
 declare function require(name: string);
 var schema_object = {
     properties:{
         'Select date dd/mm/yyyy':{
-            pattern: /^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$/,
-            message: 'Please enter date as dd/mm/yyyy',
+            pattern: /^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$|all/,
+            message: 'Please enter date as dd/mm/yyyy (`all` for all)',
             required: true
         }
     }
@@ -25,13 +26,31 @@ class view_main{
         var prompt = require('prompt');
         var prom_ret = new Promise(function(resolve, reject){
             prompt.get(schema_object, function(err, result){
-                var date_string: string = misc_func.dateparser(result['Select date dd/mm/yyyy']);
-                that._date = date_string;
-                resolve(date_string)
+                if(result['Select date dd/mm/yyyy'].toLowerCase() === "all"){
+                   var ret_prom:Promise<Array<event_class>> = sql_func.general_query("SELECT * FROM devbox.events_data;");
+                   ret_prom.then(function(cls_arr){
+                       output_functions. (cls_arr);
+                       return;
+                   }).then(function(){
+                       main_menu.mainmenu();
+                   })
+                } else {
+                    var date_string: string = misc_func.dateparser(result['Select date dd/mm/yyyy']);
+                    that._date = date_string;
+                    resolve(date_string)
+                }
             })
         }).then(function(renamed){
             var str: string = renamed.toString();
-            sql_func.retrieve_by_date(str, main_menu.mainmenu);
+            var ret_prom: Promise<Array<event_class>> = sql_func.retrieve_by_date(str);
+            ret_prom.then(function(res_arr){
+                for(var x in res_arr){
+                    console.log(misc_func.output_event(res_arr[x]))
+                }
+                return;
+            }).then(function(){
+                main_menu.mainmenu();
+            })
         })
     }
 }

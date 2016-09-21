@@ -5,8 +5,8 @@
 
 import event_class from './event_class'
 import sql_func from './sql_func'
-import misc_func from './misc_func'
 import main_menu from './main-menu'
+import query_builders from './query-builders'
 declare function require(name: string);
 
 var schema_object = {
@@ -18,41 +18,24 @@ var schema_object = {
         }
     }
 }
-class week{
-    public static week_query_string(date_arr: string[]): string{
-        var pre_string: string = "SELECT * FROM devbox.events_data WHERE dateandtime > " + date_arr[0] + " AND dateandtime < " + date_arr[1] + ";";
-        return pre_string;
-    }
+class week{    
     public static week_get(){
         var prom = new Promise(function(resolve, reject){
-            var ret_prom = sql_func.general_query(week.week_query_string(misc_func.get_week_date()))
+            var ret_prom = sql_func.general_query(query_builders.week_query_builder())
             
             ret_prom.then(function(arr_obj){
                 check_func.print_results(arr_obj, resolve);
-            }).then(function(){
-                main_menu.mainmenu();
             })
             
-        })
-    }
-    
+        }).then(function(){
+                main_menu.mainmenu();
+            })
+    }    
 }
-class day{
-    public static day_query_string(): string{
-        var query_string: string = "";
-        var now_date: Date = new Date();
-        var dd: string = misc_func.single_date_to_double_date(now_date.getDate());
-        var mm: string = misc_func.single_date_to_double_date(now_date.getMonth() + 1);
-        var yyyy: string = now_date.getFullYear().toString();
-        
-        query_string = yyyy + mm + dd;
-        var output_string = "SELECT * FROM devbox.events_data WHERE dateandtime = " + query_string
-        return output_string;
-        
-    }
+class day{    
     public static day_get(){
         var prom = new Promise(function(resolve, reject){
-            var ret_prom = sql_func.general_query(day.day_query_string());
+            var ret_prom = sql_func.general_query(query_builders.day_query_builder());
             ret_prom.then(function(arr_obj){
                 check_func.print_results(arr_obj, resolve);
             })
@@ -61,18 +44,10 @@ class day{
         })
     } 
 }
-class month{
-    public static month_query_string(){
-        var orig_date = new Date();
-        var orig_string = orig_date.getFullYear().toString() + misc_func.single_date_to_double_date(((orig_date.getMonth() + 1))) + orig_date.getDate().toString();
-        orig_date.setMonth(orig_date.getMonth() + 2);        
-        var out_string = orig_date.getFullYear().toString() + misc_func.single_date_to_double_date(orig_date.getMonth()) + orig_date.getDate().toString();        
-        var pre_string: string = "SELECT * FROM devbox.events_data WHERE dateandtime >=" + orig_string + " AND dateandtime <=" + out_string;        
-        return pre_string;        
-    }
+class month{    
     public static month_get(){
         var prom = new Promise(function(resolve, reject){
-            var ret_prom = sql_func.general_query(month.month_query_string());
+            var ret_prom = sql_func.general_query(query_builders.month_query_builder());
             ret_prom.then(function(arr_obj){
                 check_func.print_results(arr_obj, resolve);
             })
@@ -82,18 +57,7 @@ class month{
     }
 }
 class check_func{
-    
-    public static print_results(res_arr: Array<event_class>, cb?: Function): void{
-        for(var x in res_arr){
-            console.log(misc_func.output_event(res_arr[x]));
-        }
-        console.log("______________________")
-        if(cb){
-            cb();
-        }
-        return;
-    }
-    
+        
     public static check_menu(){
         var that = this;
         var prompt = require('prompt');

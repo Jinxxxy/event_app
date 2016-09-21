@@ -1,11 +1,11 @@
 declare function require(name: string);
 import event_class from './event_class'
-import misc_func from './misc_func'
+import mainmenu from './main-menu'
 
 var mysql = require('mysql');
 
 export default class sql_func{    
-    public static result_to_array(result_arr: any): Array<event_class>{
+    public static result_to_array(result_arr: any, cb?: Function): Array<event_class>{
         
         var output_arr: Array<Object> = [];
         var class_arr: Array<event_class> = [];
@@ -24,7 +24,10 @@ export default class sql_func{
             }
             return class_arr;
         } else if(Object.keys(result_arr).length === 0) {
-            console.log("No results to return");
+            console.log("No results to return. Please check parameters");
+            if(cb){
+                cb();
+            }
         } else {
             console.log("Something went wront, please restart");
         }
@@ -39,13 +42,19 @@ export default class sql_func{
         
         return connection;
     }  
-    public static retrieve_by_date(date: string, cb?: Function){
+    public static retrieve_by_date(date: string, cb?: Function): Promise<Array<event_class>>{
         var connection = this.create_connection();
-        connection.query("SELECT * FROM devbox.events_data WHERE dateandtime = " + date + " ;", function(err, results){
-            console.log("results: " + Object.keys(results).length + "entries for the specified date");
-            cb();
-            return;
-        });
+        var prom = new Promise(function(resolve, reject){
+            connection.query("SELECT * FROM devbox.events_data WHERE dateandtime = " + date + " ;", function(err, results){
+                misc_func.console_log("Results");
+                console.log("Results: " + Object.keys(results).length + " entries for the specified date");
+                var cls_arr: Array<event_class> = sql_func.result_to_array(results);
+                resolve(cls_arr)
+                
+            })
+        })
+        return prom;
+        ;
     }  
     public static retrieve(){        
         var connection = this.create_connection();        
@@ -89,7 +98,7 @@ export default class sql_func{
             } else {                            
                 connection.end(function(err){});
                 console.log("The following was added: ")
-                console.log(misc_func.output_event(result));
+                console.log(misc_func.output_event(sql_func.result_to_array(result)[0]));
                 if(cb){
                     cb();
                 }
@@ -97,7 +106,7 @@ export default class sql_func{
             }
         })
     }
-    public static general_query(query: string, cb? : Function): Promise<Array<event_class>>{
+    public static general_query(query: string): Promise<Array<event_class>>{
         var connection = this.create_connection();
         var output: Array<event_class> = [];
         var prom = new Promise(function(resolve, reject){
@@ -113,17 +122,7 @@ export default class sql_func{
         return prom;
         
         
-    }
-    public static update_query_builder(upd_eve: event_class): string{
-        var pre_string: string = "UPDATE devbox.events_data SET ";
-        var add_date: string = "dateandtime = " + misc_func.dateparser(upd_eve.date) + ", ";
-        var add_type: string = "type = '" + upd_eve.type + "', ";
-        var add_notes: string = "notes = '" + upd_eve.notes + "', ";
-        var add_recurring: string = "recurring = " + upd_eve.recurring;
-        var end_string: string = " WHERE idkey = " + upd_eve.id;
-        var output_string: string = pre_string + add_date + add_type + add_notes + add_recurring + end_string;
-        return output_string;
-    }
+    }    
     public static update_event(upd_string: string): Promise<string>{
          var conn = sql_func.create_connection();
          var prom = new Promise(function(resolve, reject){
@@ -137,5 +136,19 @@ export default class sql_func{
          })    
       })
       return prom;         
+    }
+    public static void_return_query(query: string): Promise<string>{
+        var conn = sql_func.create_connection();
+        var prom = new Promise(function(resolve, reject){
+            conn.query(query, function(err, result){
+                if(err){
+                    resolve(result);
+                } else {
+                    resolve(result)
+                }               
+            })    
+        })
+        return prom;
+        
     }
 }
