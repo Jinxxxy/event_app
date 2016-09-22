@@ -64,7 +64,7 @@ class export_to_html {
             resolve(file_contents);
         }).then(function (file_contents) {
             var fs = require('fs');
-            fs.writeFile('output.html', file_contents, function (err) {
+            fs.writeFile('./output/output.html', file_contents, function (err) {
                 if (err) {
                     throw err;
                 }

@@ -9,6 +9,8 @@ import check_main from './check-main'
 import output_functions from './output_functions'
 import date_fnc from './date_functions'
 import exp_html from './export-html'
+import exp_json from './export-json'
+import exp_xml from './export-xml'
 declare function require(name: string);
 var schema_object = {
     properties:{
@@ -28,10 +30,12 @@ class view_main{
         var prom_ret = new Promise(function(resolve, reject){
             prompt.get(schema_object, function(err, result){
                 if(result['Select date dd/mm/yyyy'].toLowerCase() === "all"){
-                   var ret_prom:Promise<Array<event_class>> = sql_func.general_query("SELECT * FROM devbox.events_data;");
+                   var ret_prom:Promise<Array<event_class>> = sql_func.general_query("SELECT * FROM devbox.events_data ORDER BY dateandtime asc");
                    ret_prom.then(function(cls_arr){
                        output_functions.print_result_cards(cls_arr);
                        exp_html.export_main(cls_arr)
+                       exp_json.export_main(cls_arr)
+                       exp_xml.export_main(cls_arr)
                        return;
                    }).then(function(){
                        main_menu.mainmenu();
