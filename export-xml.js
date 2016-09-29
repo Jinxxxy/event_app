@@ -1,5 +1,4 @@
 "use strict";
-const main_menu_1 = require('./main-menu');
 class export_to_xml {
     static file_content_builder(cls_arr) {
         var pre_xml = `<events>\r\n`;
@@ -32,7 +31,8 @@ class export_to_xml {
                 console.log("File created");
                 return;
             }).then(function () {
-                main_menu_1.default.mainmenu();
+                //Take function call back to main program
+                //main_menu.mainmenu();
             });
         });
     }

@@ -55,8 +55,14 @@ class Startup {
             var id;
             var prom_val = sql_func_1.default.insert(Startup.res_data);
             prom_val.then(function (idval) {
-                sql_func_1.default.retrieve_last(idval, main_menu_1.default.mainmenu);
-                return;
+                if (idval.err_flag === true) {
+                    console.log(idval.err);
+                    return;
+                }
+                else {
+                    sql_func_1.default.retrieve_last(idval.record_id, main_menu_1.default.mainmenu);
+                    return;
+                }
             });
         });
     }

@@ -1,5 +1,4 @@
 "use strict";
-const main_menu_1 = require('./main-menu');
 class export_to_json {
     static file_content_builder(cls_arr) {
         var pre_json = `
@@ -39,7 +38,7 @@ class export_to_json {
                 console.log("File created");
                 return;
             }).then(function () {
-                main_menu_1.default.mainmenu();
+                //return to mainmenu function
             });
         });
     }

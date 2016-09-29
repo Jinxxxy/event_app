@@ -51,6 +51,7 @@ class query_builders{
         WHERE
         (dateandtime = ` + query_string + ` AND recurring = 0) OR ((MONTH(dateandtime) = ` + mm + ` AND DAY(dateandtime) = ` + dd + `) AND recurring = 1);
         `
+        console.log(output_string);
         return output_string;
         
     }
@@ -71,6 +72,9 @@ class query_builders{
         OR
         (MONTH(dateandtime) = ` + start_month + ` AND DAY(dateandtime) > ` + day_val + `)) AND recurring = 1;`        
         return pre_string;        
+    }
+    public static all_query_builder(){
+        return "SELECT * FROM devbox.events_data";
     }
 }
 

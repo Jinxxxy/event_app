@@ -7,6 +7,7 @@ import event_class from './event_class'
 import sql_func from './sql_func'
 import mainmenu from './main-menu'
 import date_fnc from './date_functions'
+import result_class from './result_class'
 
 // resolve issue to export schema_objects to a separate class file
 var schema_objects = {
@@ -60,9 +61,14 @@ export default class Startup {
         }).then(function(){
             var id: number;
             var prom_val = sql_func.insert(Startup.res_data);
-            prom_val.then(function(idval){
-                sql_func.retrieve_last(idval, mainmenu.mainmenu);
-                return;
+            prom_val.then(function(idval: result_class){
+                if(idval.err_flag === true){
+                    console.log(idval.err);
+                    return;
+                } else {
+                    sql_func.retrieve_last(idval.record_id, mainmenu.mainmenu);
+                    return;   
+                }                
             })
         })
         

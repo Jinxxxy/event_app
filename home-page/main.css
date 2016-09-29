@@ -30,6 +30,18 @@ h1{
     margin: 5px;
     display: inline-block;
 }
+.button-inv{
+    height: 25px;
+    width: 75px;
+    border: 1px dashed grey;
+    background-color: white;
+    text-align: center;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 5px;
+    display: inline-block;
+    color: black;
+}
 #menu-block{
  background-color: darkgray;
  border-top: 1px dashed white;
@@ -42,8 +54,23 @@ h1{
     height: 325px;
     border-radius: 5px;
 }
+#output-view{
+    overflow: scroll;
+    height: 325px;
+    color: white;
+}
 .view{
     display: none;
+}
+#no-result{
+    color:white;
+    border: 5px solid white;
+}
+#view-view{
+    text-align: center;
+}
+#export-view{
+    text-align: center;
 }
 .form-container{
     background-color: grey;

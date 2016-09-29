@@ -1,6 +1,5 @@
 import sql_func from './sql_func';
 import event_class from './event_class';
-import main_menu from './main-menu';
 declare function require(name: string);
 
 class export_to_xml{
@@ -36,7 +35,8 @@ class export_to_xml{
                 console.log("File created")
                 return;
             }).then(function(){
-                main_menu.mainmenu();
+                //Take function call back to main program
+                //main_menu.mainmenu();
             })
         })
     }

@@ -25,11 +25,13 @@ class week{
             var ret_prom = sql_func.general_query(query_builders.week_query_builder())
             
             ret_prom.then(function(arr_obj){
-                output_functions.print_result_cards(arr_obj, resolve);
+                output_functions.print_result_cards(arr_obj.res_array, resolve);
+                resolve(arr_obj)
             })
             
         }).then(function(){
                 main_menu.mainmenu();
+                
             })
     }    
 }
@@ -38,7 +40,7 @@ class day{
         var prom = new Promise(function(resolve, reject){
             var ret_prom = sql_func.general_query(query_builders.day_query_builder());
             ret_prom.then(function(arr_obj){
-                output_functions.print_result_cards(arr_obj, resolve);
+                output_functions.print_result_cards(arr_obj.res_array, resolve);
             })
         }).then(function(){
             main_menu.mainmenu();
@@ -50,7 +52,7 @@ class month{
         var prom = new Promise(function(resolve, reject){
             var ret_prom = sql_func.general_query(query_builders.month_query_builder());
             ret_prom.then(function(arr_obj){                
-                output_functions.print_result_cards(arr_obj, resolve);
+                output_functions.print_result_cards(arr_obj.res_array, resolve);
             })
         }).then(function(){
             

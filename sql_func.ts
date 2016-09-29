@@ -1,12 +1,10 @@
 declare function require(name: string);
 import event_class from './event_class'
-import mainmenu from './main-menu'
-import output_functions from './output_functions'
 import date_functions from './date_functions'
-
 var mysql = require('mysql');
-
-export default class sql_func{    
+import result_class from './result_class'
+export default class sql_func{
+       
     public static result_to_array(result_arr: any, cb?: Function): Array<event_class>{
         
         var output_arr: Array<Object> = [];
@@ -27,14 +25,15 @@ export default class sql_func{
             return class_arr;
         } else if(Object.keys(result_arr).length === 0) {
             console.log("No results to return. Please check parameters");
-            mainmenu.mainmenu();
+            var empty_array: event_class[] = [];
+            return empty_array;
         } else {
             console.log("Something went wront, please restart");
         }
     }
     public static create_connection(): any{
         var connection = mysql.createConnection({
-            host: "localhost",
+            host: "127.0.0.1",
             port: '3306',
             user: 'root',
             password: 'root'
@@ -45,8 +44,7 @@ export default class sql_func{
     public static retrieve_by_date(date: string, cb?: Function): Promise<Array<event_class>>{
         var connection = this.create_connection();
         var prom = new Promise(function(resolve, reject){
-            connection.query("SELECT * FROM devbox.events_data WHERE dateandtime = " + date + " ;", function(err, results){
-                output_functions.console_log("Results");
+            connection.query("SELECT * FROM devbox.events_data WHERE dateandtime = " + date + " ;", function(err, results){                
                 console.log("Results: " + Object.keys(results).length + " entries for the specified date");
                 var cls_arr: Array<event_class> = sql_func.result_to_array(results);
                 resolve(cls_arr)
@@ -55,33 +53,23 @@ export default class sql_func{
         })
         return prom;
         ;
-    }  
-    public static retrieve(){        
-        var connection = this.create_connection();        
-        connection.connect();        
-        connection.query("SELECT * FROM devbox.events_data", function(err, result){
-            if(err){
-                console.log(err);                
-                connection.end(function(err){});
-            } else {
-                connection.end(function(err){});    
-            }            
-        })
-        
-        return;               
-    }    
-    public static insert(event: event_class): Promise<number> {
+    }        
+    public static insert(event: event_class): Promise<result_class> {
         var return_id: number;
         var connection = this.create_connection();
         var prom = new Promise(function(res, rej){
             connection.query("insert into devbox.events_data(dateandtime, type, notes, recurring) values('" + event.date + "', '" + event.type + "', \"" + event.notes + '", "' + event.recurring + '");', {title: 'test'}, function(err, result) {
                 if (err){
-                    connection.end(function(err){});
-                    throw err;               
+                    connection.end(function(err){
+                        
+                    });
+                    var res_obj: result_class = new result_class([], err.message, true, -1);
+                    res(res_obj);              
                 } else {                
                     connection.end(function(err){});
                     return_id = result.insertId;
-                    res(return_id)                           
+                    var res_obj: result_class = new result_class([], "", false, return_id)
+                    res(res_obj)                           
                 }  
                          
             })
@@ -96,9 +84,7 @@ export default class sql_func{
                 connection.end(function(err){});
                 throw err;
             } else {                            
-                connection.end(function(err){});
-                console.log("The following was added: ")
-                console.log(output_functions.output_event(sql_func.result_to_array(result)[0]));
+                connection.end(function(err){});                
                 if(cb){
                     cb();
                 }
@@ -106,16 +92,23 @@ export default class sql_func{
             }
         })
     }
-    public static general_query(query: string): Promise<Array<event_class>>{
+    public static general_query(query: string): Promise<result_class>{
         var connection = this.create_connection();
         var output: Array<event_class> = [];
         var prom = new Promise(function(resolve, reject){
             connection.query(query, function(err, result){
-                if(err){                  
-                    throw err;                    
-                } else {
-                    var output: Array<event_class> = sql_func.result_to_array(result);                      
-                    resolve(output);              
+                if(err){
+                    var err_obj: result_class = new result_class([], err.message, true, -1);
+                    resolve(err_obj);                
+                    console.log(err)                    
+                } else {                                        
+                    var output: Array<event_class> = sql_func.result_to_array(result);
+                    if(output.length === 0){
+                        var no_res_obj: result_class = new result_class([], "No results to return. Please check parameters", false)
+                        resolve(no_res_obj);
+                    }
+                    var res_obj: result_class = new result_class(output,"Promise from general query",false, -1);                                         
+                    resolve(res_obj);             
                 }                
             })
         })

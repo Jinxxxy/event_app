@@ -4,7 +4,7 @@ import main_menu from './main-menu';
 declare function require(name: string);
 
 class export_to_json{
-    private static file_content_builder(cls_arr: Array<event_class>): string{
+    public static file_content_builder(cls_arr: Array<event_class>): string{
         var pre_json: string = `
         {\n
           \t"events":{  
@@ -42,7 +42,7 @@ class export_to_json{
                 console.log("File created")
                 return;
             }).then(function(){
-                main_menu.mainmenu();
+                //return to mainmenu function
             })
         })
     }

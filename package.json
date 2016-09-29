@@ -4,7 +4,10 @@
   "description": "test",
   "main": "main-menu.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "concurrently \"npm run tsc_server\" \"npm run tsc_page\"",
+    "tsc_page": "tsc -module amd -target es6 home-page/page-js",
+    "tsc_server": "tsc -module commonjs -target es6 home-page/server"
     
   },
   "author": "",

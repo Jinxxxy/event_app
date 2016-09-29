@@ -1,11 +1,10 @@
-import sql_func from './sql_func';
+//import sql_func from './sql_func';
 import event_class from './event_class';
-import main_menu from './main-menu';
+//import main_menu from './main-menu';
 declare function require(name: string);
 
 class export_to_html{
-    private static file_content_builder(cls_arr: Array<event_class>): string{
-        var pre_html: string = `
+    private static pre_html: string = `
         <html>
         <head>  
         <style>
@@ -38,6 +37,13 @@ class export_to_html{
         </style>      
         <body>
         `;
+    private static post_html: string = `
+                </body>        
+            </head>
+        </html>
+        `;
+    
+    public static file_content_builder(cls_arr: Array<event_class>): string{        
         var building: string = "";
         for(var event in cls_arr){
             building += `
@@ -52,18 +58,12 @@ class export_to_html{
             </div>
             <br>            
             `
-        }
-        var post_html: string = `
-                </body>        
-            </head>
-        </html>
-        `;
-        var full_string: string = pre_html + building + post_html;
-        return full_string;
+        }       
+        return building;
     }
     public static export_main(cls_arr: Array<event_class>){
         var prom = new Promise(function(resolve, reject){
-            var file_contents: string = export_to_html.file_content_builder(cls_arr);
+            var file_contents: string = export_to_html.pre_html + (export_to_html.file_content_builder(cls_arr)) + export_to_html.post_html;
             resolve(file_contents)
         }).then(function(file_contents){
             var fs = require('fs');
@@ -74,7 +74,8 @@ class export_to_html{
                 console.log("File created")
                 return;
             }).then(function(){
-                main_menu.mainmenu();
+                //move function call back to main-menu method
+                //main_menu.mainmenu();
             })
         })
     }
