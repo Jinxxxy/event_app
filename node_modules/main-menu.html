@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="main.css">
+        <script data-main="page-js" src="require.js"></script>
+        <body>
+            <div id="outline">
+            <span id="title-bar"><h1>Events</h1></span>
+            
+            <div id="menu-block">
+                <div class="button" id="add-button"> Add </div>
+                <div class="button" id="view-button"> View </div>
+                <div class="button" id="edit-button"> Edit </div>
+            </div>
+            <div id="working-area">
+                <div class="view" id="add-view">
+                    <div class="form-container">
+                        <div id="align-content">
+                            Add a new event:<br><br>
+                            Date: <input class="form_items" type="date" id="dateinput"><br><br>
+                            Type: <select class="form_items" id="typeinput"><br><br>
+                                    <option>Event</option>
+                                    <option>Anniversary</option>
+                                    <option>Birthday</option>
+                                </select>
+                                <br><br>
+                            Notes: <input class="form_items" type="text" id="notesinput"><br><br>
+                            Recurring: <select class="form_items" id="recurringinput">
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select><br><br>
+                            <div class="button" id="submit_button"> Submit </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="view" id="view-view">
+                    VIEW
+                </div>
+                <div class="view" id="edit-view">
+                    EDIT
+                </div>
+            </div>    
+            </div>
+            </div>            
+            <script type="text/javascript" src="page-js.js"></script>
+        </body>
+    </head>
+</html>

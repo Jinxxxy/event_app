@@ -1,5 +1,5 @@
 
-class event_class{
+    export class event_class{
     
         public id: number;
         public date: string;
@@ -24,5 +24,7 @@ class event_class{
                 this.id = _id_key; 
             }
         }   
-    };
+    };   
+
 export default event_class;
+//export { event_class};

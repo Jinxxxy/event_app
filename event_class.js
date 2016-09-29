@@ -18,6 +18,8 @@ class event_class {
         }
     }
 }
+exports.event_class = event_class;
 ;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = event_class;
+//export { event_class}; 
