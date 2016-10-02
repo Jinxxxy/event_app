@@ -18,19 +18,23 @@ var export_day_button: HTMLElement = document.getElementById("export-day-button"
 var export_month_button: HTMLElement = document.getElementById("export-month-button");
 var export_all_button: HTMLElement = document.getElementById("export-all-button");
 ///<reference path="C:\Development\node\events_cli\event_class.ts" />
-///<reference path="./Filesaver.min.js" />
+///<reference path="./../FileSaver.d.ts" />
 import event_class from "./../event_class";
 import html_export from "./../export-html";
+import filesaver from "./FileSaver";
+import date_func from "./../date_functions";
 
 requirejs(["../event_class"],function(event_class){
     console.log("event_class has been loaded");
 })
 requirejs(["../export-html"],function(html_export){
     console.log("html_export has been loaded");
-})  
-requirejs(["./fs"], function(fs){
-    console.log("fs loaded");
 })
+requirejs([],function(date_func){
+    console.log("Date Functions Loaded...")
+})  
+
+declare var filesaver: any;
 
 var base_conn_string = "http://127.0.0.1:3000/";
 
@@ -113,13 +117,13 @@ class page_functions{
         output_view.style.display = "inline-block";
         view_view.style.display = "none";
         var no_res: string = "No results! <br> Try adding an event for this";
-        output_view.innerHTML += no_res;
-        output_view.style.backgroundColor = "grey";
+        output_view.innerHTML += no_res;       
         output_view.style.color = "white";
     }      
     public static view_callback(conn: string):Array<event_class>{
-        console.log(conn.indexOf("***No results to return***"))
-        if(conn.indexOf("***No results to return***") === -1){
+        console.log(conn)
+        console.log(conn.indexOf("No results to return"))
+        if(conn.indexOf("No results to return") === -1){
             console.log(JSON.parse(conn));
             var ev_cls = JSON.parse((JSON.parse(conn))).events;
             console.log(typeof ev_cls);
@@ -136,12 +140,78 @@ class page_functions{
         }
         
         
-    }    
+    }  
+    public static create_span_element(): HTMLElement{
+        var span_elem: HTMLElement = document.createElement("span");
+        return span_elem;
+    }  
+    public static create_br_element(): HTMLElement{
+        var header: HTMLElement = document.createElement("br");
+        return header;
+    }
+    public static get_ddmmyyy_from_date(date_obj: Date):string{
+        var dd:string = date_func.single_date_to_double_date(date_obj.getDate());
+        var mm:string = (date_obj.getMonth() + 1).toString();
+        var yyyy:string = date_obj.getFullYear().toString();
+        return dd + "/" + mm + "/" + yyyy;
+    }
+    public static create_event_element(to_display: event_class): HTMLElement{
+        var container:HTMLElement = document.createElement("div");
+        var event_container: HTMLElement = document.createElement("div");
+        var inner:HTMLElement = document.createElement("div");
+        var hr: HTMLElement = document.createElement("hr");
+        var header: HTMLElement = document.createElement("h3");
+        var date_span: HTMLElement = this.create_span_element();
+        var type_span: HTMLElement = this.create_span_element();
+        var id_span: HTMLElement = this.create_span_element();
+        var hr:HTMLElement = document.createElement("hr");
+        var ref_date: string = this.get_ddmmyyy_from_date(new Date());
+        var check_date: string = to_display.date;
+        console.log(ref_date + " : " + check_date);
+        event_container.className = "event";
+        header.id = "header";
+        inner.className = "inner";
+        console.log(ref_date === check_date)
+        type_span.innerText = "Type: " + to_display.type;
+        id_span.innerText = "ID: " + to_display.id.toString();
+        if(ref_date === check_date){
+            date_span.innerText = to_display.date;
+            date_span.style.textShadow = "0 0 10px yellow";
+        } else {
+            date_span.innerText = "Date: " + to_display.date;
+        }
+        
+        header.innerText = to_display.notes;
+        header.style.textAlign = "center"
+        inner.appendChild(id_span);
+        inner.appendChild(this.create_br_element());
+        inner.appendChild(this.create_br_element());
+        inner.appendChild(type_span);
+        inner.appendChild(this.create_br_element());
+        inner.appendChild(this.create_br_element());
+        inner.appendChild(date_span);
+        inner.appendChild(this.create_br_element());
+        //inner.appendChild(this.create_br_element());
+        event_container.appendChild(header);
+        event_container.appendChild(hr);
+        event_container.appendChild(inner);    
+        container.style.margin = "0 auto"           
+        container.appendChild(document.createElement("br"));
+        container.appendChild(event_container);
+        event_container.style.border = "1px dashed grey";
+        event_container.style.borderRadius = "10px";
+        event_container.style.right = "5%";
+        event_container.style.padding = "5%";
+        container.style.width = "80%"        
+        return container;        
+    }
     public static display_result(event_array: Array<event_class>){          
-            var to_add_to_dom: string = html_export.file_content_builder(event_array);
+           for(var item in event_array){
+               var to_add: HTMLElement =  this.create_event_element(event_array[item])
+               output_view.appendChild(to_add);
+           }
             output_view.style.display = "block";
             view_view.style.display = "none";
-            output_view.innerHTML = to_add_to_dom;    
         
     }
     public static get_query_result(query_identifier: string){        
@@ -163,16 +233,30 @@ class page_functions{
         var exp_prom = new Promise(function(resolve, reject){
             var conn = new XMLHttpRequest();
             conn.open("GET", base_conn_string + type_string, true);
-            conn.onload = function(){
-                console.log(conn.response)
+            conn.onload = function(){                
+                resolve(conn.response)
             }
             conn.send();
         })
         return exp_prom;
     }
+    public static clear_output_view(){
+        while(output_view.firstChild){
+            output_view.removeChild(output_view.firstChild);
+        }                            
+    }
     public static save_file(json_string: string){
-        var a = document.createElement("a");
-        
+        var download_link = document.createElement("a");
+        download_link.href="./../output-cache/test.json";
+        download_link.innerHTML = "Click here to download your file"
+        download_link.className = "button";
+        download_link.style.position = "absolute";
+        download_link.style.top  = "0";
+        download_link.style.left = "0";
+        download_link.onclick = function(){
+            document.removeChild(this);
+        }
+        document.body.appendChild(download_link);
     }
 }
 
@@ -195,7 +279,7 @@ function on_off(button: HTMLElement) {
         };
     view_button.onclick = function () {
         on_off(view_button);
-        output_view.style.display = "none";
+        page_functions.clear_output_view();    
         };
     edit_button.onclick = function () {
         on_off(edit_button);
@@ -221,7 +305,7 @@ function on_off(button: HTMLElement) {
         page_functions.get_query_result("QUERY=\"SELECTMONTH\"")
         }
     view_all_button.onclick = function(){
-        page_functions.get_query_result("QUERY=\"SELECTALL\"")
+        page_functions.get_query_result("QUERY=\"SELECTALL\"")        
         }    
     export_day_button.onclick = function(){
         page_functions.request_export("***DAY::EXPORT//==//JSON***").then(function(){
@@ -230,6 +314,7 @@ function on_off(button: HTMLElement) {
         }
     export_week_button.onclick = function(){
         page_functions.request_export("***WEEK::EXPORT//==//JSON***").then(function(json){
+                
                 page_functions.save_file(json)
             })
         }

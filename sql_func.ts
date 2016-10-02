@@ -97,6 +97,7 @@ export default class sql_func{
         var output: Array<event_class> = [];
         var prom = new Promise(function(resolve, reject){
             connection.query(query, function(err, result){
+                console.log("connection-loaded")
                 if(err){
                     var err_obj: result_class = new result_class([], err.message, true, -1);
                     resolve(err_obj);                
@@ -106,9 +107,11 @@ export default class sql_func{
                     if(output.length === 0){
                         var no_res_obj: result_class = new result_class([], "No results to return. Please check parameters", false)
                         resolve(no_res_obj);
+                    } else {
+                        var ret_obj: result_class = new result_class(output, "", false);
+                        resolve(ret_obj);
                     }
-                    var res_obj: result_class = new result_class(output,"Promise from general query",false, -1);                                         
-                    resolve(res_obj);             
+                                                     
                 }                
             })
         })

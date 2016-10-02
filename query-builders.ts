@@ -66,11 +66,11 @@ class query_builders{
                 
         var pre_string: string = `
         SELECT * FROM devbox.events_data WHERE         
-        (((dateandtime > `+ orig_string + `) AND (dateandtime < ` + out_string + `)) AND recurring = 0) 
+        (((dateandtime >= `+ orig_string + `) AND (dateandtime < ` + out_string + `)) AND recurring = 0) 
         OR	
-        ((MONTH(dateandtime) = ` + end_month +  ` AND DAY(dateandtime) < ` + day_val + `)
+        ((MONTH(dateandtime) = ` + end_month +  ` AND DAY(dateandtime) <= ` + day_val + `)
         OR
-        (MONTH(dateandtime) = ` + start_month + ` AND DAY(dateandtime) > ` + day_val + `)) AND recurring = 1;`        
+        (MONTH(dateandtime) = ` + start_month + ` AND DAY(dateandtime) >= ` + day_val + `)) AND recurring = 1;`        
         return pre_string;        
     }
     public static all_query_builder(){

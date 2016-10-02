@@ -59,11 +59,11 @@ class query_builders {
         var out_string = orig_date.getFullYear().toString() + date_functions_1.default.single_date_to_double_date(orig_date.getMonth()) + orig_date.getDate().toString();
         var pre_string = `
         SELECT * FROM devbox.events_data WHERE         
-        (((dateandtime > ` + orig_string + `) AND (dateandtime < ` + out_string + `)) AND recurring = 0) 
+        (((dateandtime >= ` + orig_string + `) AND (dateandtime < ` + out_string + `)) AND recurring = 0) 
         OR	
-        ((MONTH(dateandtime) = ` + end_month + ` AND DAY(dateandtime) < ` + day_val + `)
+        ((MONTH(dateandtime) = ` + end_month + ` AND DAY(dateandtime) <= ` + day_val + `)
         OR
-        (MONTH(dateandtime) = ` + start_month + ` AND DAY(dateandtime) > ` + day_val + `)) AND recurring = 1;`;
+        (MONTH(dateandtime) = ` + start_month + ` AND DAY(dateandtime) >= ` + day_val + `)) AND recurring = 1;`;
         return pre_string;
     }
     static all_query_builder() {

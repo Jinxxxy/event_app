@@ -8,14 +8,14 @@
     "build": "concurrently \"npm run tsc_server\" \"npm run tsc_page\"",
     "tsc_page": "tsc -module amd -target es6 home-page/page-js",
     "tsc_server": "tsc -module commonjs -target es6 home-page/server"
-    
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/filesaver": "0.0.30",
+    "es6-promise": "^3.0.2",
     "express": "^4.14.0",
     "mysql": "^2.11.1",
-    "prompt": "^1.0.0",
-    "es6-promise": "^3.0.2"
+    "prompt": "^1.0.0"
   }
 }

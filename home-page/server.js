@@ -173,26 +173,44 @@ var create = http.createServer(function (req, res) {
                 var month_prom = parse_string.get_results(query_builders_1.default.month_query_builder());
                 month_prom.then(function (res_obj) {
                     if (res_obj.err_flag === true) {
-                        console.log("err" + res_obj.err);
+                        console.log("err " + res_obj.err);
+                        return;
                     }
                     else {
-                        var response_content = export_json_1.default.file_content_builder((res_obj.res_array));
-                        res.writeHead(200, { "content-type": "text/plain" });
-                        res.end(response_content);
+                        if (res_obj.err.indexOf("No results to return. Please check parameters") !== -1) {
+                            return ("***No results to return***. Please check parameters");
+                        }
+                        else {
+                            var response_content = export_json_1.default.file_content_builder((res_obj.res_array));
+                            return (response_content);
+                        }
                     }
+                }).then(function (res_body) {
+                    console.log(JSON.stringify(res_body));
+                    res.writeHead(200, { "content-type": "text/plain" });
+                    res.end(JSON.stringify(res_body));
                 });
                 break;
             case "QUERY=\"SELECTALL\"":
-                var all_prom = parse_string.get_results("SELECT * FROM devbox.events_data ORDER BY dateandtime asc");
+                var all_prom = parse_string.get_results("SELECT * FROM devbox.events_data");
                 all_prom.then(function (res_obj) {
                     if (res_obj.err_flag === true) {
-                        console.log(res_obj.err);
+                        console.log("err " + res_obj.err);
+                        return;
                     }
                     else {
-                        var response_content = export_json_1.default.file_content_builder((res_obj.res_array));
-                        res.writeHead(200, { "content-type": "text/plain" });
-                        res.end(response_content);
+                        if (res_obj.err.indexOf("No results to return. Please check parameters") !== -1) {
+                            return ("***No results to return***. Please check parameters");
+                        }
+                        else {
+                            var response_content = export_json_1.default.file_content_builder((res_obj.res_array));
+                            return (response_content);
+                        }
                     }
+                }).then(function (res_body) {
+                    console.log(JSON.stringify(res_body));
+                    res.writeHead(200, { "content-type": "text/plain" });
+                    res.end(JSON.stringify(res_body));
                 });
                 break;
         }

@@ -1,4 +1,4 @@
-define(["require", "exports", "./../event_class", "./../export-html", "fs"], function (require, exports, event_class_1, export_html_1, fs) {
+define(["require", "exports", "./../event_class", "./../date_functions"], function (require, exports, event_class_1, date_functions_1) {
     "use strict";
     ///<reference path="C:\Development\node\events_cli\require.d.ts" />
     var add_button = document.getElementById('add-button');
@@ -25,8 +25,8 @@ define(["require", "exports", "./../event_class", "./../export-html", "fs"], fun
     requirejs(["../export-html"], function (html_export) {
         console.log("html_export has been loaded");
     });
-    requirejs(["./fs"], function (fs) {
-        console.log("fs loaded");
+    requirejs([], function (date_func) {
+        console.log("Date Functions Loaded...");
     });
     var base_conn_string = "http://127.0.0.1:3000/";
     class button_element_pair {
@@ -98,12 +98,12 @@ define(["require", "exports", "./../event_class", "./../export-html", "fs"], fun
             view_view.style.display = "none";
             var no_res = "No results! <br> Try adding an event for this";
             output_view.innerHTML += no_res;
-            output_view.style.backgroundColor = "grey";
             output_view.style.color = "white";
         }
         static view_callback(conn) {
-            console.log(conn.indexOf("***No results to return***"));
-            if (conn.indexOf("***No results to return***") === -1) {
+            console.log(conn);
+            console.log(conn.indexOf("No results to return"));
+            if (conn.indexOf("No results to return") === -1) {
                 console.log(JSON.parse(conn));
                 var ev_cls = JSON.parse((JSON.parse(conn))).events;
                 console.log(typeof ev_cls);
@@ -120,11 +120,77 @@ define(["require", "exports", "./../event_class", "./../export-html", "fs"], fun
                 page_functions.no_result();
             }
         }
+        static create_span_element() {
+            var span_elem = document.createElement("span");
+            return span_elem;
+        }
+        static create_br_element() {
+            var header = document.createElement("br");
+            return header;
+        }
+        static get_ddmmyyy_from_date(date_obj) {
+            var dd = date_functions_1.default.single_date_to_double_date(date_obj.getDate());
+            var mm = (date_obj.getMonth() + 1).toString();
+            var yyyy = date_obj.getFullYear().toString();
+            return dd + "/" + mm + "/" + yyyy;
+        }
+        static create_event_element(to_display) {
+            var container = document.createElement("div");
+            var event_container = document.createElement("div");
+            var inner = document.createElement("div");
+            var hr = document.createElement("hr");
+            var header = document.createElement("h3");
+            var date_span = this.create_span_element();
+            var type_span = this.create_span_element();
+            var id_span = this.create_span_element();
+            var hr = document.createElement("hr");
+            var ref_date = this.get_ddmmyyy_from_date(new Date());
+            var check_date = to_display.date;
+            console.log(ref_date + " : " + check_date);
+            event_container.className = "event";
+            header.id = "header";
+            inner.className = "inner";
+            console.log(ref_date === check_date);
+            type_span.innerText = "Type: " + to_display.type;
+            id_span.innerText = "ID: " + to_display.id.toString();
+            if (ref_date === check_date) {
+                date_span.innerText = to_display.date;
+                date_span.style.textShadow = "0 0 10px yellow";
+            }
+            else {
+                date_span.innerText = "Date: " + to_display.date;
+            }
+            header.innerText = to_display.notes;
+            header.style.textAlign = "center";
+            inner.appendChild(id_span);
+            inner.appendChild(this.create_br_element());
+            inner.appendChild(this.create_br_element());
+            inner.appendChild(type_span);
+            inner.appendChild(this.create_br_element());
+            inner.appendChild(this.create_br_element());
+            inner.appendChild(date_span);
+            inner.appendChild(this.create_br_element());
+            //inner.appendChild(this.create_br_element());
+            event_container.appendChild(header);
+            event_container.appendChild(hr);
+            event_container.appendChild(inner);
+            container.style.margin = "0 auto";
+            container.appendChild(document.createElement("br"));
+            container.appendChild(event_container);
+            event_container.style.border = "1px dashed grey";
+            event_container.style.borderRadius = "10px";
+            event_container.style.right = "5%";
+            event_container.style.padding = "5%";
+            container.style.width = "80%";
+            return container;
+        }
         static display_result(event_array) {
-            var to_add_to_dom = export_html_1.default.file_content_builder(event_array);
+            for (var item in event_array) {
+                var to_add = this.create_event_element(event_array[item]);
+                output_view.appendChild(to_add);
+            }
             output_view.style.display = "block";
             view_view.style.display = "none";
-            output_view.innerHTML = to_add_to_dom;
         }
         static get_query_result(query_identifier) {
             var prom = new Promise(function () {
@@ -146,15 +212,29 @@ define(["require", "exports", "./../event_class", "./../export-html", "fs"], fun
                 var conn = new XMLHttpRequest();
                 conn.open("GET", base_conn_string + type_string, true);
                 conn.onload = function () {
-                    console.log(conn.response);
+                    resolve(conn.response);
                 };
                 conn.send();
             });
             return exp_prom;
         }
+        static clear_output_view() {
+            while (output_view.firstChild) {
+                output_view.removeChild(output_view.firstChild);
+            }
+        }
         static save_file(json_string) {
-            var file = new File([json_string], "test.json");
-            fs.writeFile("test.json", json_string);
+            var download_link = document.createElement("a");
+            download_link.href = "./../output-cache/test.json";
+            download_link.innerHTML = "Click here to download your file";
+            download_link.className = "button";
+            download_link.style.position = "absolute";
+            download_link.style.top = "0";
+            download_link.style.left = "0";
+            download_link.onclick = function () {
+                document.removeChild(this);
+            };
+            document.body.appendChild(download_link);
         }
     }
     function on_off(button) {
@@ -177,7 +257,7 @@ define(["require", "exports", "./../event_class", "./../export-html", "fs"], fun
         };
         view_button.onclick = function () {
             on_off(view_button);
-            output_view.style.display = "none";
+            page_functions.clear_output_view();
         };
         edit_button.onclick = function () {
             on_off(edit_button);

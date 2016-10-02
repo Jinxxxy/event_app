@@ -62,7 +62,7 @@ class parse_string{
     public static get_time_from_url(url_sting: string): string{
         var working_string: string = "";
         working_string = url_sting.slice(4, url_sting.indexOf("::"));
-        console.log("WS: " + working_string + "\n" + url_sting.indexOf("***" + 2).toString() + "\n" + url_sting.indexOf("::"));
+        
         
         return working_string;
     }
@@ -113,18 +113,15 @@ class parse_string{
 
 
 var create = http.createServer(function(req, res){ 
-    console.log(req.url);
     if(
         req.url.indexOf("date") !== -1 &&
         req.url.indexOf("notes") !== -1 &&
         req.url.indexOf("type") !== -1 &&
         req.url.indexOf("recurring") !== -1        
       ){
-        console.log(querystring.escape(req.url))
         var parsed_string: string = parse_string.replace_vals(req.url);        
         var obj = JSON.parse(parsed_string);
         var ev_cls: event_class[] = parse_string.obj_to_class(obj)
-        console.log(ev_cls);
         var prom: Promise<result_class> = sql_func.insert(ev_cls[0]);
         prom.then(function(srv_res){            
             if(srv_res.record_id === -1){
@@ -139,7 +136,6 @@ var create = http.createServer(function(req, res){
               
       } else if (req.url.indexOf("QUERY") !== -1) {
           var query_string = req.url.slice(req.url.indexOf("QUERY="), req.url.length);
-          console.log("QS=" + query_string);
           var comparison_val: string = parse_string.replace_vals(query_string);
           switch(comparison_val){
               case "QUERY=\"SELECTDAY\"": 
@@ -189,24 +185,40 @@ var create = http.createServer(function(req, res){
               var month_prom: Promise<result_class> = parse_string.get_results(query_builders.month_query_builder());
               month_prom.then(function(res_obj){                
                  if(res_obj.err_flag === true){
-                      console.log("err" + res_obj.err);
-                  } else {                      
-                      var response_content: string = json_export.file_content_builder((res_obj.res_array))                      
-                      res.writeHead(200, {"content-type":"text/plain"});                      
-                      res.end(response_content);
+                      console.log("err " + res_obj.err);
+                      return
+                  } else {
+                      if(res_obj.err.indexOf("No results to return. Please check parameters") !== -1){
+                          return("***No results to return***. Please check parameters");
+                      } else {
+                          var response_content: string = json_export.file_content_builder((res_obj.res_array))                          
+                          return(response_content);   
+                      }                                            
                   }
+              }).then(function(res_body){
+                  console.log(JSON.stringify(res_body));                      
+                      res.writeHead(200, {"content-type":"text/plain"});                      
+                      res.end(JSON.stringify(res_body));
               })
               break;
               case "QUERY=\"SELECTALL\"":
-              var all_prom: Promise<result_class> = parse_string.get_results("SELECT * FROM devbox.events_data ORDER BY dateandtime asc");
+              var all_prom: Promise<result_class> = parse_string.get_results("SELECT * FROM devbox.events_data");
               all_prom.then(function(res_obj){                
                  if(res_obj.err_flag === true){
-                      console.log(res_obj.err);
-                  } else {                      
-                      var response_content: string = json_export.file_content_builder((res_obj.res_array))                      
-                      res.writeHead(200, {"content-type":"text/plain"});                      
-                      res.end(response_content);
+                      console.log("err " + res_obj.err);
+                      return
+                  } else {
+                      if(res_obj.err.indexOf("No results to return. Please check parameters") !== -1){
+                          return("***No results to return***. Please check parameters");
+                      } else {
+                          var response_content: string = json_export.file_content_builder((res_obj.res_array))                          
+                          return(response_content);   
+                      }                                            
                   }
+              }).then(function(res_body){
+                  console.log(JSON.stringify(res_body));                      
+                      res.writeHead(200, {"content-type":"text/plain"});                      
+                      res.end(JSON.stringify(res_body));
               })
               break;            
           }
