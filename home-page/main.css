@@ -19,6 +19,21 @@ body{
 h1{
     text-align: center;
 }
+.operation-output-view{
+    width: 475px;
+    height: 100px;
+    margin: 10px;
+    top: 10px;
+    background-color: grey;
+    color: black;
+    border: 2px dashed white;
+    position: absolute;
+    top: 10px;
+    left:10px;
+    text-align: center;
+    z-index: 1;
+    border-radius: 10px;
+}
 .button{
     height: 25px;
     width: 75px;
@@ -29,6 +44,34 @@ h1{
     padding: 5px;
     margin: 5px;
     display: inline-block;
+    
+}
+.menu-button{
+    height: 25px;
+    width: 75px;
+    border: 1px dashed white;
+    background-color: black;
+    text-align: center;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 2.5%;
+    display: inline-block;
+}
+#output-container{
+    display:none;
+    position: absolute;
+    top:0px;
+    left:0px;
+}
+.output-background{
+    height: 510px;
+    width: 510px;
+    background-color: grey;    
+    position: absolute;
+    opacity: 0.5;
+    top: 5px;
+    left: 5px;
+    border-radius: 10px;
 }
 .button-inv{
     height: 25px;
@@ -45,19 +88,29 @@ h1{
 #menu-block{
  background-color: darkgray;
  border-top: 1px dashed white;
- border-bottom: 1px dashed white;   
+ border-bottom: 1px dashed white;
+ align-content: center;   
 }
 #working-area{
     border:2px solid white;
     width: 450px;
     margin: 25px;
     height: 325px;
+    top: -10px;
     border-radius: 5px;
 }
+
 #output-view{
     overflow: scroll;
-    height: 325px;
+    height: 100%;
     color: white;
+}
+#close-output-button{
+    position: absolute;
+    display: block;
+    top: 75px;
+    left: 200px;
+    z-index: 5;
 }
 .view{
     display: none;
@@ -71,6 +124,30 @@ h1{
 }
 #export-view{
     text-align: center;
+    background-color: grey
+}
+.json{
+    display: inline-block;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    height:100%;
+    margin-right: 7.5%;
+    background-color: black
+}
+.xml{
+    display: inline-block;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    height:100%;
+    background-color: black
+}
+.html{    
+    display: inline-block;
+    border-left: 1px solid white;
+    border-right: 1px solid white;   
+    margin-left:7.5%;
+    height:100%;
+    background-color: black
 }
 .form-container{
     background-color: grey;
@@ -82,6 +159,22 @@ h1{
     margin-left: 75px;
     margin-top: 25px;
     padding-left: 5px;
+}
+.event-pick-form{
+    margin-top: 5px;
+    margin-left: 75px;
+}
+.edit-form-container{
+    background-color: grey;
+    width: 300px;
+    height: 175px;
+    border: 2px white solid;
+    border-radius: 10px;    
+    text-align: left;    
+    margin-left: 75px ;
+    margin-top: 5px;
+    padding-left: 5px;
+    display: none;
 }
 #submit_button{
     background-color: grey;

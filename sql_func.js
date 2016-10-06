@@ -9,11 +9,12 @@ class sql_func {
         var class_arr = [];
         if (Object.keys(result_arr).length > 0) {
             for (var x in result_arr) {
-                output_arr.push(result_arr[x]);
+                //output_arr.push(result_arr[x])
                 var date_var = date_functions_1.default.date_to_date_string(result_arr[x]['dateandtime']);
                 var tmp_cls = new event_class_1.default(date_var, result_arr[x]['type'], result_arr[x]['notes'], result_arr[x]['recurring'], result_arr[x]['idkey']);
                 class_arr.push(tmp_cls);
             }
+            console.log(class_arr);
             return class_arr;
         }
         else if (Object.keys(result_arr).length === 0) {
@@ -95,13 +96,16 @@ class sql_func {
                     console.log(err);
                 }
                 else {
-                    var output = sql_func.result_to_array(result);
-                    if (output.length === 0) {
-                        var no_res_obj = new result_class_1.default([], "No results to return. Please check parameters", false);
+                    console.log(result.length);
+                    if (result.length < 1) {
+                        console.log("output length = 0");
+                        var no_res_obj = new result_class_1.default([], "**//No Results", false);
                         resolve(no_res_obj);
                     }
                     else {
+                        var output = sql_func.result_to_array(result);
                         var ret_obj = new result_class_1.default(output, "", false);
+                        console.log(ret_obj);
                         resolve(ret_obj);
                     }
                 }

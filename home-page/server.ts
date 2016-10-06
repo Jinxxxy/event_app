@@ -38,16 +38,29 @@ class parse_string{
     }
     public static obj_to_class(obj:any): event_class[]{
         var cls_arr: Array<event_class> = [];
+        console.log(obj);
         for(var item in obj){
-            var cls = new event_class(
-            obj.event['date'],
-            obj.event['type'],
-            obj.event['notes'],
-            obj.event['recurring']
+            if(obj.event['id']){
+                var cls = new event_class(
+                obj.event['date'],
+                obj.event['type'],
+                obj.event['notes'],
+                obj.event['recurring'],
+                obj.event['id']            
+            )
+            } else {
+                var cls = new event_class(
+                obj.event['date'],
+                obj.event['type'],
+                obj.event['notes'],
+                obj.event['recurring']            
             )    
+            }
+            
+                
             cls_arr.push(cls);
         }
-        
+        console.log(cls_arr);
         return cls_arr;
     }
     public static get_results(query: string):Promise<result_class>{        
@@ -66,6 +79,9 @@ class parse_string{
         
         return working_string;
     }
+    public static get_id_from_url(url_string: string){
+        return url_string.split("EDIT-GET::")[1].replace("***","");
+    }
     public static get_time_function(time: string): Function{
         var target:string = time;
         switch (target) {
@@ -80,6 +96,13 @@ class parse_string{
         }
         
     }
+    public static update_function(update_data: string): Promise<string>{
+        console.log(update_data)
+        var update_prom: Promise<string> = new Promise(function(resolve, reject){
+            resolve(sql_func.update_event(query_builders.update_query_builder(parse_string.obj_to_class(JSON.parse(update_data.replace("***","")))[0])))
+        })
+        return update_prom;
+    }
     public static server_export_function(export_type: string, export_time:string): Promise<string>{
         var query_function: Function = parse_string.get_time_function(export_time);
         var server_export_prom: Promise<string> = new Promise(function(resolve, reject){
@@ -87,22 +110,38 @@ class parse_string{
               case "JSON":
               var export_json_prom: Promise<result_class> = sql_func.general_query(query_function())
               export_json_prom.then(function(res_cls){
-              var export_json_output_string: string = json_export.file_content_builder(res_cls.res_array)  
-              resolve(export_json_output_string)            
+              var export_json_output_string: string = json_export.file_content_builder(res_cls.res_array)
+              console.log(export_json_output_string);
+              if(res_cls.res_array.length >= 1){
+                  console.log("Resolving")
+
+                  resolve(export_json_output_string);    
+              } else {
+                  console.log("Rejecting");
+                  reject("**//No Results");
+              }            
               })
               break;
               case "HTML":
               var export_html_prom: Promise<result_class> = sql_func.general_query(query_function())
               export_html_prom.then(function(res_cls){
               var export_html_output_string: string = html_export.file_content_builder(res_cls.res_array)
-              resolve(export_html_output_string)              
+              if(res_cls.res_array.length >= 1){
+                  resolve(export_html_output_string);    
+              } else {
+                  reject("**//No Results");
+              }              
               })
               break;
               case "XML":
               var export_xml_prom: Promise<result_class> = sql_func.general_query(query_function())
               export_xml_prom.then(function(res_cls){
-              var export_xml_output_string: string = json_export.file_content_builder(res_cls.res_array)
-              resolve(export_xml_output_string)              
+              var export_xml_output_string: string = xml_export.file_content_builder(res_cls.res_array)
+              if(res_cls.res_array.length >= 1){
+                  resolve(export_xml_output_string);    
+              } else {
+                  reject("**//No Results");
+              }              
               })              
           }          
         }) 
@@ -113,21 +152,18 @@ class parse_string{
 
 
 var create = http.createServer(function(req, res){ 
-    if(
-        req.url.indexOf("date") !== -1 &&
-        req.url.indexOf("notes") !== -1 &&
-        req.url.indexOf("type") !== -1 &&
-        req.url.indexOf("recurring") !== -1        
-      ){
-        var parsed_string: string = parse_string.replace_vals(req.url);        
+    if(req.url.indexOf("***ADD-NEW:://") !== -1){
+        var parsed_string: string = parse_string.replace_vals(req.url).replace("***ADD-NEW:://","");        
         var obj = JSON.parse(parsed_string);
         var ev_cls: event_class[] = parse_string.obj_to_class(obj)
         var prom: Promise<result_class> = sql_func.insert(ev_cls[0]);
         prom.then(function(srv_res){            
             if(srv_res.record_id === -1){
+                res.setHeader("Access-Control-Allow-Origin", "*");
                 res.writeHead(200, {"content-type":"text/plain"})
                 res.end("Unable to create record. Please try again. \n Error Code: " + srv_res.err);
             } else if (srv_res.record_id !== -1){
+                res.setHeader("Access-Control-Allow-Origin", "*");
                 res.writeHead(200, {"content-type":"text/plain"});    
                 res.end("Record created. \nID: " + srv_res.record_id);     
             }
@@ -148,7 +184,7 @@ var create = http.createServer(function(req, res){
                       console.log("err " + res_obj.err);
                       return
                   } else {
-                      if(res_obj.err.indexOf("No results to return. Please check parameters") !== -1){
+                      if(res_obj.err.indexOf("**//No Results") !== -1){
                           return("No results to return. Please check parameters");
                       } else {
                           var response_content: string = json_export.file_content_builder((res_obj.res_array))                          
@@ -156,7 +192,7 @@ var create = http.createServer(function(req, res){
                       }                                            
                   }
               }).then(function(res_body){
-                  console.log(JSON.stringify(res_body));                      
+                  res.setHeader("Access-Control-Allow-Origin", "*");                      
                       res.writeHead(200, {"content-type":"text/plain"});                      
                       res.end(JSON.stringify(res_body));
               })
@@ -166,9 +202,9 @@ var create = http.createServer(function(req, res){
               week_prom.then(function(res_obj){                
                  if(res_obj.err_flag === true){
                       console.log("err " + res_obj.err);
-                      return
+                      return("***No results to return***. Something went wrong with your request.")
                   } else {
-                      if(res_obj.err.indexOf("No results to return. Please check parameters") !== -1){
+                      if(res_obj.err.indexOf("**//No Results") !== -1){
                           return("***No results to return***. Please check parameters");
                       } else {
                           var response_content: string = json_export.file_content_builder((res_obj.res_array))                          
@@ -176,9 +212,9 @@ var create = http.createServer(function(req, res){
                       }                                            
                   }
               }).then(function(res_body){
-                  console.log(JSON.stringify(res_body));                      
-                      res.writeHead(200, {"content-type":"text/plain"});                      
-                      res.end(JSON.stringify(res_body));
+                  res.setHeader("Access-Control-Allow-Origin", "*");                      
+                res.writeHead(200, {"content-type":"text/plain"});                      
+                res.end(JSON.stringify(res_body));
               })
               break;
               case "QUERY=\"SELECTMONTH\"":
@@ -188,7 +224,7 @@ var create = http.createServer(function(req, res){
                       console.log("err " + res_obj.err);
                       return
                   } else {
-                      if(res_obj.err.indexOf("No results to return. Please check parameters") !== -1){
+                      if(res_obj.err.indexOf("**//No Results") !== -1){
                           return("***No results to return***. Please check parameters");
                       } else {
                           var response_content: string = json_export.file_content_builder((res_obj.res_array))                          
@@ -196,7 +232,7 @@ var create = http.createServer(function(req, res){
                       }                                            
                   }
               }).then(function(res_body){
-                  console.log(JSON.stringify(res_body));                      
+                  res.setHeader("Access-Control-Allow-Origin", "*");                      
                       res.writeHead(200, {"content-type":"text/plain"});                      
                       res.end(JSON.stringify(res_body));
               })
@@ -206,9 +242,9 @@ var create = http.createServer(function(req, res){
               all_prom.then(function(res_obj){                
                  if(res_obj.err_flag === true){
                       console.log("err " + res_obj.err);
-                      return
+                      return("***No results to return***. Something went wrong with your request");
                   } else {
-                      if(res_obj.err.indexOf("No results to return. Please check parameters") !== -1){
+                      if(res_obj.err.indexOf("**//No Results") !== -1){
                           return("***No results to return***. Please check parameters");
                       } else {
                           var response_content: string = json_export.file_content_builder((res_obj.res_array))                          
@@ -216,7 +252,7 @@ var create = http.createServer(function(req, res){
                       }                                            
                   }
               }).then(function(res_body){
-                  console.log(JSON.stringify(res_body));                      
+                      res.setHeader("Access-Control-Allow-Origin", "*");                      
                       res.writeHead(200, {"content-type":"text/plain"});                      
                       res.end(JSON.stringify(res_body));
               })
@@ -227,13 +263,44 @@ var create = http.createServer(function(req, res){
           var export_type_comparison_val: string = parse_string.parse_to_comp_value(req.url);
           var export_data_prom = parse_string.server_export_function(export_type_comparison_val, export_time_comparision_val);
           export_data_prom.then(function(export_data){
-              
-              res.writeHead(200, {"content-type":"application/JSON"});                      
+              console.log("Export Output")
+              res.setHeader("Access-Control-Allow-Origin", "*");
+              res.writeHead(200, {"content-type":"text/plain"});                     
               res.end(export_data);
+          }).catch(function(){              
+              res.setHeader("Access-Control-Allow-Origin", "*");
+              res.writeHead(200, {"content-type":"text/plain"});                    
+              res.end("**//No Results");
           })
                           
           
+      } else if(req.url.indexOf("***EDIT-GET::") !== -1){
+          console.log(parse_string.get_id_from_url(req.url))
+          var query_id: string = parse_string.get_id_from_url(req.url);
+          var get_by_id_prom: Promise<result_class> = parse_string.get_results("SELECT * FROM devbox.events_data WHERE idkey = " + query_id + ";");+
+          get_by_id_prom.then(function(res_cls){
+              if(res_cls.res_array.length === 0){
+                  return ("**//No Results")
+              } else {
+                  var data_to_send: string = json_export.file_content_builder(res_cls.res_array);
+                  return (data_to_send);
+              }
+          }).then(function(response_data){
+              res.setHeader("Access-Control-Allow-Origin", "*");
+              res.writeHead(200, {"content-type":"text/plain"});                      
+              res.end(JSON.stringify(response_data));
+          })
+      } else if(req.url.indexOf("***UPDATE:://") !== -1){
+          console.log("UPDATE");
+          var data_to_send: string = parse_string.replace_vals(req.url.replace("***UPDATE:://",""));
+          var update_prom: Promise<string> = parse_string.update_function(data_to_send);
+          update_prom.then(function(message_string){
+              res.setHeader("Access-Control-Allow-Origin", "*");
+              res.writeHead(200, {"content-type":"text/plain"});    
+              res.end("Record created. \nID: " + message_string); 
+          })
       } else {
+          res.setHeader("Access-Control-Allow-Origin", "*");
           res.writeHead(200, {"content-type":"text/plain"});
           res.end("Bad Request");
       }

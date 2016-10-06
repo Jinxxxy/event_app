@@ -9,9 +9,9 @@ export default class sql_func{
         
         var output_arr: Array<Object> = [];
         var class_arr: Array<event_class> = [];
-        if(Object.keys(result_arr).length    > 0){
+        if(Object.keys(result_arr).length > 0){
             for(var x in result_arr){
-                output_arr.push(result_arr[x])
+                //output_arr.push(result_arr[x])
                 var date_var = date_functions.date_to_date_string(result_arr[x]['dateandtime']); 
                 var tmp_cls = new event_class(
                     date_var,
@@ -22,6 +22,7 @@ export default class sql_func{
                 )
                 class_arr.push(tmp_cls);
             }
+            console.log(class_arr);
             return class_arr;
         } else if(Object.keys(result_arr).length === 0) {
             console.log("No results to return. Please check parameters");
@@ -102,13 +103,16 @@ export default class sql_func{
                     var err_obj: result_class = new result_class([], err.message, true, -1);
                     resolve(err_obj);                
                     console.log(err)                    
-                } else {                                        
-                    var output: Array<event_class> = sql_func.result_to_array(result);
-                    if(output.length === 0){
-                        var no_res_obj: result_class = new result_class([], "No results to return. Please check parameters", false)
+                } else {
+                    console.log(result.length)                   
+                    if(result.length < 1){
+                        console.log("output length = 0")
+                        var no_res_obj: result_class = new result_class([], "**//No Results", false)
                         resolve(no_res_obj);
                     } else {
+                        var output: Array<event_class> = sql_func.result_to_array(result);
                         var ret_obj: result_class = new result_class(output, "", false);
+                        console.log(ret_obj);
                         resolve(ret_obj);
                     }
                                                      

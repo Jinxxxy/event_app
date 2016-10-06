@@ -7,6 +7,12 @@ define(["require", "exports"], function (require, exports) {
             basestring = split_string[2] + split_string[1] + split_string[0];
             return basestring;
         }
+        static reverse_date_parser(string_val) {
+            var basestring = "";
+            var split_string = string_val.split('/');
+            basestring = string_val.slice(0, 4) + string_val.slice(5, 7) + string_val.slice(8, 10);
+            return basestring;
+        }
         static single_date_to_double_date(_date) {
             var out_date = _date.toString();
             if (out_date.length === 1) {

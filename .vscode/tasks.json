@@ -2,9 +2,9 @@
 	"version": "0.1.0",
 	"command": "C:\\Development\\node\\events_cli\\node_modules\\tsc\\bin\\tsc",
 	"isShellCommand": true,
-	"args": ["--module commonjs -target es6", "app-main.ts"],
+	"args": ["-module amd -target es6", "../home-page/page-js"],
 	"windows": {
-		"command": "C:\\Development\\node\\events_cli\\node_modules\\tsc\\bin\\tsc",
+		"command": "tsc",
 		"isShellCommand": true
 	},
 	"showOutput": "silent",

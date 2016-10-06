@@ -6,12 +6,16 @@
         <body>
             <div id="outline">
             <span id="title-bar"><h1>Events</h1></span>
-            
+            <div id="output-container">
+                <div class="operation-output-view" id="output-view-id">ERROR</div>
+                <div class="button" id="close-output-button">Close</div>
+                <div class="output-background" id="output-background"></div>
+            </div>
             <div id="menu-block">
-                <div class="button" id="add-button"> Add </div>
-                <div class="button" id="view-button"> View </div>
-                <div class="button" id="edit-button"> Edit </div>
-                <div class="button" id="export-button"> Export </div>
+                <div class="menu-button" id="add-button"> Add </div>
+                <div class="menu-button" id="view-button"> View </div>
+                <div class="menu-button" id="edit-button"> Edit </div>
+                <div class="menu-button" id="export-button"> Export </div>
             </div>
             <div id="working-area">
                 <div class="view" id="add-view">
@@ -46,15 +50,62 @@
                     RESULTS
                 </div>
                 <div class="view" id="edit-view">
-                    EDIT
+                    <div class="event-pick-form">
+                            Enter event ID: <input type="text" id="event-id"><br>
+                            <div class="button" id="edit-pick-submit-button"> Get </div>
+                    </div>     
+                    <hr>               
+                    <div class="edit-form-container" id="edit-form-container">
+                        <div id="align-content">
+                        Edit event:<br><br>
+                        Date: <input class="edit-form_items" type="date" id="edit-dateinput"><br><br>
+                        Type: <select class="edit-form_items" id="edit-typeinput" ><br><br>
+                                <option>Event</option>
+                                <option>Anniversary</option>
+                                <option>Birthday</option>
+                                </select>
+                            <br><br>
+                        Notes: <input class="edit-form-items" type="text" id="edit-notesinput" readonly><br><br>
+                        Recurring: <select class="edit-form-items" id="edit-recurringinput">
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select><br><br>
+                        <div class="button" id="edit-submit-button"> Submit </div><div class="button" id="edit-delete-button"> Delete </div>
+                        </div>                        
+                    </div>
+                </div>
+                <div class="view" id="edit-pick-view">
+                    <div class="event-pick-form">
+                        Enter event ID: <input type="text" id="event-id"><br>
+                        <div class="button" id="edit-pick-submit-button"> Get </div>
+                    </div>
                 </div>
                 <div class="view" id="export-view">
-                    <br><h3>EXPORT</h3>
-                    <br>
-                    <div class="button-inv" id="export-day-button"> Today </div><br>
-                    <div class="button-inv" id="export-week-button"> Week </div><br>
-                    <div class="button-inv" id="export-month-button"> Month </div><br>
-                    <div class="button-inv" id="export-all-button"> All </div><br>
+                    <div class="JSON">
+                        <br><h3>JSON</h3>
+                        <br>
+                        <div class="button-inv" id="json-export-day-button"> Today </div><br>
+                        <div class="button-inv" id="json-export-week-button"> Week </div><br>
+                        <div class="button-inv" id="json-export-month-button"> Month </div><br>
+                        <div class="button-inv" id="json-export-all-button"> All </div><br>
+                    </div>
+                    <div class="XML">
+                        <br><h3>XML</h3>
+                        <br>
+                        <div class="button-inv" id="xml-export-day-button"> Today </div><br>
+                        <div class="button-inv" id="xml-export-week-button"> Week </div><br>
+                        <div class="button-inv" id="xml-export-month-button"> Month </div><br>
+                        <div class="button-inv" id="xml-export-all-button"> All </div><br>
+                    </div>
+                    <div class="HTML">
+                        <br><h3>HTML</h3>
+                        <br>
+                        <div class="button-inv" id="html-export-day-button"> Today </div><br>
+                        <div class="button-inv" id="html-export-week-button"> Week </div><br>
+                        <div class="button-inv" id="html-export-month-button"> Month </div><br>
+                        <div class="button-inv" id="html-export-all-button"> All </div><br>
+                    </div>
+                    </div>
                 </div>
             </div>    
             </div>

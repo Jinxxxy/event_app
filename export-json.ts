@@ -6,26 +6,25 @@ declare function require(name: string);
 class export_to_json{
     public static file_content_builder(cls_arr: Array<event_class>): string{
         var pre_json: string = `
-        {\n
-          \t"events":{  
+{
+\t"events":{  
         `;
         var building: string = "";
         for(var event in cls_arr){
             building += `
-            \t\t "` + cls_arr[event].id + `": { 
-            \t\t\t"ID": "` + cls_arr[event].id + `",\n
-            \t\t\t"Date": "` + cls_arr[event].date + `",\n
-            \t\t\t"Type": "` + cls_arr[event].type + `",\n
-            \t\t\t"Notes": "` + cls_arr[event].notes + `",\n
-            \t\t\t"Recurring": "` + cls_arr[event].recurring + `"\n 
-            \t\t },           
-            `
+\t\t "` + cls_arr[event].id + `": {
+\t\t\t"ID": "` + cls_arr[event].id + `",
+\t\t\t"Date": "` + cls_arr[event].date + `",
+\t\t\t"Type": "` + cls_arr[event].type + `",
+\t\t\t"Notes": "` + cls_arr[event].notes + `",
+\t\t\t"Recurring": "` + cls_arr[event].recurring + `"
+\t\t },
+`
         }        
         building = building.slice(0, building.lastIndexOf(","));        
         var post_json: string = `
-        \t}
-        }    
-        `;
+\t}
+}`;
         var full_string: string = pre_json + building + post_json;
         return full_string;
     }
@@ -34,16 +33,7 @@ class export_to_json{
             var file_contents: string = export_to_json.file_content_builder(cls_arr);
             resolve(file_contents)
         }).then(function(file_contents){
-            var fs = require('fs');
-            fs.writeFile('./output/output.json', file_contents, function(err){
-                if(err){
-                    throw err;
-                }
-                console.log("File created")
-                return;
-            }).then(function(){
-                //return to mainmenu function
-            })
+            
         })
     }
 }

@@ -3,13 +3,15 @@ import date_functions from './date_functions'
 
 class query_builders{
     public static update_query_builder(upd_eve: event_class): string{
+        console.log("Date Func: " + upd_eve.date);
         var pre_string: string = "UPDATE devbox.events_data SET ";
-        var add_date: string = "dateandtime = " + date_functions.dateparser(upd_eve.date) + ", ";
+        var add_date: string = "dateandtime = " + upd_eve.date + ", ";
         var add_type: string = "type = '" + upd_eve.type + "', ";
         var add_notes: string = "notes = '" + upd_eve.notes + "', ";
         var add_recurring: string = "recurring = " + upd_eve.recurring;
-        var end_string: string = " WHERE idkey = " + upd_eve.id;
+        var end_string: string = " WHERE idkey = " + upd_eve.id;    
         var output_string: string = pre_string + add_date + add_type + add_notes + add_recurring + end_string;
+        console.log(output_string);
         return output_string;
     }
     public static delete_query_builder(id: number){
