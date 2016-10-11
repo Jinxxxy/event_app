@@ -1,16 +1,16 @@
 "use strict";
-///<reference path="C:\Development\node\events_cli\require.d.ts" />
-///<reference path="C:\Development\node\events_cli\event_class.ts" />
+///<reference path="C:\Development\node\events_cli\libs\require.d.ts" />
+///<reference path="C:\Development\node\events_cli\libs\event_class.ts" />
 require("amd-loader");
 var http = require('http');
 var url = require('url');
 var querystring = require('querystring');
-const event_class_1 = require('./../event_class');
-const sql_func_1 = require('./../sql_func');
-const query_builders_1 = require('./../query-builders');
-const export_json_1 = require('./../export-json');
-const export_html_1 = require('./../export-html');
-const export_xml_1 = require('./../export-xml');
+const event_class_1 = require('./../../libs/event_class');
+const sql_func_1 = require('./../../libs/sql_func');
+const query_builders_1 = require('./../../libs/query-builders');
+const export_json_1 = require('./../../libs/export-json');
+const export_html_1 = require('./../../libs/export-html');
+const export_xml_1 = require('./../../libs/export-xml');
 class parse_string {
     constructor(_string) {
         this.pre_string = _string;
@@ -34,7 +34,6 @@ class parse_string {
     }
     static obj_to_class(obj) {
         var cls_arr = [];
-        console.log(obj);
         for (var item in obj) {
             if (obj.event['id']) {
                 var cls = new event_class_1.default(obj.event['date'], obj.event['type'], obj.event['notes'], obj.event['recurring'], obj.event['id']);
@@ -44,7 +43,6 @@ class parse_string {
             }
             cls_arr.push(cls);
         }
-        console.log(cls_arr);
         return cls_arr;
     }
     static get_results(query) {
@@ -78,7 +76,6 @@ class parse_string {
         }
     }
     static update_function(update_data) {
-        console.log(update_data);
         var update_prom = new Promise(function (resolve, reject) {
             resolve(sql_func_1.default.update_event(query_builders_1.default.update_query_builder(parse_string.obj_to_class(JSON.parse(update_data.replace("***", "")))[0])));
         });
@@ -92,13 +89,10 @@ class parse_string {
                     var export_json_prom = sql_func_1.default.general_query(query_function());
                     export_json_prom.then(function (res_cls) {
                         var export_json_output_string = export_json_1.default.file_content_builder(res_cls.res_array);
-                        console.log(export_json_output_string);
                         if (res_cls.res_array.length >= 1) {
-                            console.log("Resolving");
                             resolve(export_json_output_string);
                         }
                         else {
-                            console.log("Rejecting");
                             reject("**//No Results");
                         }
                     });
@@ -136,7 +130,7 @@ var create = http.createServer(function (req, res) {
         var parsed_string = parse_string.replace_vals(req.url).replace("***ADD-NEW:://", "");
         var obj = JSON.parse(parsed_string);
         var ev_cls = parse_string.obj_to_class(obj);
-        var prom = sql_func_1.default.insert(ev_cls[0]);
+        var prom = sql_func_1.default.insert(query_builders_1.default.insert_query_builder(ev_cls[0]));
         prom.then(function (srv_res) {
             if (srv_res.record_id === -1) {
                 res.setHeader("Access-Control-Allow-Origin", "*");
@@ -155,11 +149,9 @@ var create = http.createServer(function (req, res) {
         var comparison_val = parse_string.replace_vals(query_string);
         switch (comparison_val) {
             case "QUERY=\"SELECTDAY\"":
-                console.log("CASE: QUERY=\"SELECTDAY\"");
                 var day_prom = parse_string.get_results(query_builders_1.default.day_query_builder());
                 day_prom.then(function (res_obj) {
                     if (res_obj.err_flag === true) {
-                        console.log("err " + res_obj.err);
                         return;
                     }
                     else {
@@ -181,7 +173,7 @@ var create = http.createServer(function (req, res) {
                 var week_prom = parse_string.get_results(query_builders_1.default.week_query_builder());
                 week_prom.then(function (res_obj) {
                     if (res_obj.err_flag === true) {
-                        console.log("err " + res_obj.err);
+                        ("err " + res_obj.err);
                         return ("***No results to return***. Something went wrong with your request.");
                     }
                     else {
@@ -203,7 +195,6 @@ var create = http.createServer(function (req, res) {
                 var month_prom = parse_string.get_results(query_builders_1.default.month_query_builder());
                 month_prom.then(function (res_obj) {
                     if (res_obj.err_flag === true) {
-                        console.log("err " + res_obj.err);
                         return;
                     }
                     else {
@@ -225,7 +216,6 @@ var create = http.createServer(function (req, res) {
                 var all_prom = parse_string.get_results("SELECT * FROM devbox.events_data");
                 all_prom.then(function (res_obj) {
                     if (res_obj.err_flag === true) {
-                        console.log("err " + res_obj.err);
                         return ("***No results to return***. Something went wrong with your request");
                     }
                     else {
@@ -250,7 +240,6 @@ var create = http.createServer(function (req, res) {
         var export_type_comparison_val = parse_string.parse_to_comp_value(req.url);
         var export_data_prom = parse_string.server_export_function(export_type_comparison_val, export_time_comparision_val);
         export_data_prom.then(function (export_data) {
-            console.log("Export Output");
             res.setHeader("Access-Control-Allow-Origin", "*");
             res.writeHead(200, { "content-type": "text/plain" });
             res.end(export_data);
@@ -261,7 +250,6 @@ var create = http.createServer(function (req, res) {
         });
     }
     else if (req.url.indexOf("***EDIT-GET::") !== -1) {
-        console.log(parse_string.get_id_from_url(req.url));
         var query_id = parse_string.get_id_from_url(req.url);
         var get_by_id_prom = parse_string.get_results("SELECT * FROM devbox.events_data WHERE idkey = " + query_id + ";");
         +get_by_id_prom.then(function (res_cls) {
@@ -279,13 +267,22 @@ var create = http.createServer(function (req, res) {
         });
     }
     else if (req.url.indexOf("***UPDATE:://") !== -1) {
-        console.log("UPDATE");
         var data_to_send = parse_string.replace_vals(req.url.replace("***UPDATE:://", ""));
         var update_prom = parse_string.update_function(data_to_send);
         update_prom.then(function (message_string) {
             res.setHeader("Access-Control-Allow-Origin", "*");
             res.writeHead(200, { "content-type": "text/plain" });
             res.end("Record created. \nID: " + message_string);
+        });
+    }
+    else if (req.url.indexOf("***DELETE:://") !== -1) {
+        var parsed_string = parse_string.replace_vals(req.url).replace("***DELETE:://", "");
+        var delete_prom = sql_func_1.default.delete_query(query_builders_1.default.delete_query_builder(parsed_string));
+        delete_prom.then(function (res_cls) {
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.writeHead(200, { "content-type": "text/plain" });
+            //change name of err for message value
+            res.end(res_cls.err.toString());
         });
     }
     else {

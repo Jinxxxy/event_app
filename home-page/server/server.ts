@@ -1,18 +1,18 @@
 
 
-///<reference path="C:\Development\node\events_cli\require.d.ts" />
-///<reference path="C:\Development\node\events_cli\event_class.ts" />
+///<reference path="C:\Development\node\events_cli\libs\require.d.ts" />
+///<reference path="C:\Development\node\events_cli\libs\event_class.ts" />
 require("amd-loader");
 var http = require('http'); 
 var url = require('url');
 var querystring = require('querystring');    
-import event_class from './../event_class'
-import sql_func from './../sql_func'
-import result_class from './../result_class';
-import query_builders from './../query-builders';
-import json_export from './../export-json';
-import html_export from './../export-html';
-import xml_export from './../export-xml';
+import event_class from './../../libs/event_class'
+import sql_func from './../../libs/sql_func'
+import result_class from './../../libs/result_class';
+import query_builders from './../../libs/query-builders';
+import json_export from './../../libs/export-json';
+import html_export from './../../libs/export-html';
+import xml_export from './../../libs/export-xml';
 
 class parse_string{
     private pre_string;
@@ -38,7 +38,6 @@ class parse_string{
     }
     public static obj_to_class(obj:any): event_class[]{
         var cls_arr: Array<event_class> = [];
-        console.log(obj);
         for(var item in obj){
             if(obj.event['id']){
                 var cls = new event_class(
@@ -60,7 +59,6 @@ class parse_string{
                 
             cls_arr.push(cls);
         }
-        console.log(cls_arr);
         return cls_arr;
     }
     public static get_results(query: string):Promise<result_class>{        
@@ -97,7 +95,6 @@ class parse_string{
         
     }
     public static update_function(update_data: string): Promise<string>{
-        console.log(update_data)
         var update_prom: Promise<string> = new Promise(function(resolve, reject){
             resolve(sql_func.update_event(query_builders.update_query_builder(parse_string.obj_to_class(JSON.parse(update_data.replace("***","")))[0])))
         })
@@ -111,13 +108,10 @@ class parse_string{
               var export_json_prom: Promise<result_class> = sql_func.general_query(query_function())
               export_json_prom.then(function(res_cls){
               var export_json_output_string: string = json_export.file_content_builder(res_cls.res_array)
-              console.log(export_json_output_string);
               if(res_cls.res_array.length >= 1){
-                  console.log("Resolving")
 
                   resolve(export_json_output_string);    
               } else {
-                  console.log("Rejecting");
                   reject("**//No Results");
               }            
               })
@@ -156,7 +150,7 @@ var create = http.createServer(function(req, res){
         var parsed_string: string = parse_string.replace_vals(req.url).replace("***ADD-NEW:://","");        
         var obj = JSON.parse(parsed_string);
         var ev_cls: event_class[] = parse_string.obj_to_class(obj)
-        var prom: Promise<result_class> = sql_func.insert(ev_cls[0]);
+        var prom: Promise<result_class> = sql_func.insert(query_builders.insert_query_builder(ev_cls[0]));
         prom.then(function(srv_res){            
             if(srv_res.record_id === -1){
                 res.setHeader("Access-Control-Allow-Origin", "*");
@@ -174,14 +168,12 @@ var create = http.createServer(function(req, res){
           var query_string = req.url.slice(req.url.indexOf("QUERY="), req.url.length);
           var comparison_val: string = parse_string.replace_vals(query_string);
           switch(comparison_val){
-              case "QUERY=\"SELECTDAY\"": 
-              console.log("CASE: QUERY=\"SELECTDAY\"")                           
+              case "QUERY=\"SELECTDAY\"":                          
               var day_prom: Promise<result_class> = parse_string.get_results(query_builders.day_query_builder());
               
               day_prom.then(function(res_obj){
                                   
                  if(res_obj.err_flag === true){
-                      console.log("err " + res_obj.err);
                       return
                   } else {
                       if(res_obj.err.indexOf("**//No Results") !== -1){
@@ -201,7 +193,7 @@ var create = http.createServer(function(req, res){
               var week_prom: Promise<result_class> = parse_string.get_results(query_builders.week_query_builder());
               week_prom.then(function(res_obj){                
                  if(res_obj.err_flag === true){
-                      console.log("err " + res_obj.err);
+                      ("err " + res_obj.err);
                       return("***No results to return***. Something went wrong with your request.")
                   } else {
                       if(res_obj.err.indexOf("**//No Results") !== -1){
@@ -221,7 +213,6 @@ var create = http.createServer(function(req, res){
               var month_prom: Promise<result_class> = parse_string.get_results(query_builders.month_query_builder());
               month_prom.then(function(res_obj){                
                  if(res_obj.err_flag === true){
-                      console.log("err " + res_obj.err);
                       return
                   } else {
                       if(res_obj.err.indexOf("**//No Results") !== -1){
@@ -241,7 +232,6 @@ var create = http.createServer(function(req, res){
               var all_prom: Promise<result_class> = parse_string.get_results("SELECT * FROM devbox.events_data");
               all_prom.then(function(res_obj){                
                  if(res_obj.err_flag === true){
-                      console.log("err " + res_obj.err);
                       return("***No results to return***. Something went wrong with your request");
                   } else {
                       if(res_obj.err.indexOf("**//No Results") !== -1){
@@ -263,7 +253,6 @@ var create = http.createServer(function(req, res){
           var export_type_comparison_val: string = parse_string.parse_to_comp_value(req.url);
           var export_data_prom = parse_string.server_export_function(export_type_comparison_val, export_time_comparision_val);
           export_data_prom.then(function(export_data){
-              console.log("Export Output")
               res.setHeader("Access-Control-Allow-Origin", "*");
               res.writeHead(200, {"content-type":"text/plain"});                     
               res.end(export_data);
@@ -275,7 +264,6 @@ var create = http.createServer(function(req, res){
                           
           
       } else if(req.url.indexOf("***EDIT-GET::") !== -1){
-          console.log(parse_string.get_id_from_url(req.url))
           var query_id: string = parse_string.get_id_from_url(req.url);
           var get_by_id_prom: Promise<result_class> = parse_string.get_results("SELECT * FROM devbox.events_data WHERE idkey = " + query_id + ";");+
           get_by_id_prom.then(function(res_cls){
@@ -291,7 +279,6 @@ var create = http.createServer(function(req, res){
               res.end(JSON.stringify(response_data));
           })
       } else if(req.url.indexOf("***UPDATE:://") !== -1){
-          console.log("UPDATE");
           var data_to_send: string = parse_string.replace_vals(req.url.replace("***UPDATE:://",""));
           var update_prom: Promise<string> = parse_string.update_function(data_to_send);
           update_prom.then(function(message_string){
@@ -299,6 +286,18 @@ var create = http.createServer(function(req, res){
               res.writeHead(200, {"content-type":"text/plain"});    
               res.end("Record created. \nID: " + message_string); 
           })
+      } else if(req.url.indexOf("***DELETE:://") !== -1){
+        var parsed_string: string = parse_string.replace_vals(req.url).replace("***DELETE:://","");
+        var delete_prom: Promise<result_class> = sql_func.delete_query(query_builders.delete_query_builder(parsed_string));
+        
+        delete_prom.then(function(res_cls){
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.writeHead(200, {"content-type":"text/plain"});
+            //change name of err for message value
+                      
+            res.end(res_cls.err.toString()); 
+            
+        })
       } else {
           res.setHeader("Access-Control-Allow-Origin", "*");
           res.writeHead(200, {"content-type":"text/plain"});

@@ -1,7 +1,7 @@
 <html>
     <head>
         <link rel="stylesheet" href="main.css">
-        <script src="FileSaver.js"></script>
+        <script src="../libs/FileSaver.js"></script>
         <script data-main="page-js" src="require.js"></script>
         <body>
             <div id="outline">
@@ -51,15 +51,15 @@
                 </div>
                 <div class="view" id="edit-view">
                     <div class="event-pick-form">
-                            Enter event ID: <input type="text" id="event-id"><br>
+                            Enter event ID: <input type="number" id="event-id"><br>
                             <div class="button" id="edit-pick-submit-button"> Get </div>
                     </div>     
                     <hr>               
                     <div class="edit-form-container" id="edit-form-container">
                         <div id="align-content">
                         Edit event:<br><br>
-                        Date: <input class="edit-form_items" type="date" id="edit-dateinput"><br><br>
-                        Type: <select class="edit-form_items" id="edit-typeinput" ><br><br>
+                        Date: <input class="edit-form-items" type="date" id="edit-dateinput"><br><br>
+                        Type: <select class="edit-form-items" id="edit-typeinput" ><br><br>
                                 <option>Event</option>
                                 <option>Anniversary</option>
                                 <option>Birthday</option>
@@ -70,7 +70,7 @@
                                     <option>Yes</option>
                                     <option>No</option>
                                 </select><br><br>
-                        <div class="button" id="edit-submit-button"> Submit </div><div class="button" id="edit-delete-button"> Delete </div>
+                        <div class="button" id="edit-submit-button"> Submit </div><div class="button" id="edit-delete-button"> Delete </div><div class="button" id="edit-reset-button"> Reset </div>
                         </div>                        
                     </div>
                 </div>

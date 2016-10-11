@@ -38,6 +38,23 @@ define(["require", "exports"], function (require, exports) {
             var return_string = this.single_date_to_double_date(retrieve_val.getDate()) + "/" + this.single_date_to_double_date(retrieve_val.getMonth() + 1) + "/" + retrieve_val.getFullYear().toString();
             return return_string;
         }
+        static date_no_separator(date_string) {
+            while (date_string.indexOf("/") !== -1) {
+                date_string = date_string.replace("/", "");
+            }
+            return date_string;
+        }
+        static get_date_from_date_string(date_string) {
+            var date_array = date_string.split("/");
+            var return_date = new Date(date_array[2] + "/" + date_array[1] + "/" + date_array[0]);
+            return return_date;
+        }
+        static get_ddmmyyy_from_date(date_obj) {
+            var dd = this.single_date_to_double_date(date_obj.getDate());
+            var mm = (date_obj.getMonth() + 1).toString();
+            var yyyy = date_obj.getFullYear().toString();
+            return dd + "/" + mm + "/" + yyyy;
+        }
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = date_fnc;

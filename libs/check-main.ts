@@ -4,7 +4,7 @@
 
 import event_class from './event_class'
 import sql_func from './sql_func'
-import main_menu from './main-menu'
+import main_menu from './../main-menu'
 import query_builders from './query-builders'
 import output_functions from './output_functions'
 import exp_html from './export-html'

@@ -6,6 +6,7 @@ const event_class_1 = require('./event_class');
 const sql_func_1 = require('./sql_func');
 const main_menu_1 = require('./main-menu');
 const date_functions_1 = require('./date_functions');
+const query_builders_1 = require('./query-builders');
 // resolve issue to export schema_objects to a separate class file
 var schema_objects = {
     'add-new': {
@@ -47,16 +48,14 @@ class Startup {
                     return 0;
                 }
                 var curr = new event_class_1.default(date_functions_1.default.dateparser(result['Date(dd-mm-yyyy)']), result['Type(Birthday, Anniversary, Event)'], result['Notes'], event_class_1.default.recurring_conv(result['Recurring event? (Y/N)']));
-                console.log(curr);
                 that.res_data = curr;
                 resolve();
             });
         }).then(function () {
             var id;
-            var prom_val = sql_func_1.default.insert(Startup.res_data);
+            var prom_val = sql_func_1.default.insert(query_builders_1.default.insert_query_builder(Startup.res_data));
             prom_val.then(function (idval) {
                 if (idval.err_flag === true) {
-                    console.log(idval.err);
                     return;
                 }
                 else {

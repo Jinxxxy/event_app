@@ -1,20 +1,23 @@
+declare var require: any;
 import event_class from './event_class'
 import date_functions from './date_functions'
+var mysql = require('mysql');
 
 class query_builders{
+    public static insert_query_builder(ins_eve: event_class): string{
+        return "insert into devbox.events_data(dateandtime, type, notes, recurring) values(" + mysql.escape(ins_eve.date) + "," + mysql.escape(ins_eve.type) + "," + mysql.escape(ins_eve.notes) + "," + mysql.escape(ins_eve.recurring) + ")";
+    }
     public static update_query_builder(upd_eve: event_class): string{
-        console.log("Date Func: " + upd_eve.date);
         var pre_string: string = "UPDATE devbox.events_data SET ";
         var add_date: string = "dateandtime = " + upd_eve.date + ", ";
-        var add_type: string = "type = '" + upd_eve.type + "', ";
-        var add_notes: string = "notes = '" + upd_eve.notes + "', ";
-        var add_recurring: string = "recurring = " + upd_eve.recurring;
-        var end_string: string = " WHERE idkey = " + upd_eve.id;    
-        var output_string: string = pre_string + add_date + add_type + add_notes + add_recurring + end_string;
-        console.log(output_string);
+        var add_type: string = "type = " + mysql.escape(upd_eve.type) + ", ";
+        var add_notes: string = "notes = " + mysql.escape(upd_eve.notes) + ", ";
+        var add_recurring: string = "recurring = " + mysql.escape(upd_eve.recurring);
+        var end_string: string = " WHERE idkey = " + mysql.escape(upd_eve.id);    
+        var output_string: string = pre_string + add_date + add_type + add_notes + add_recurring + end_string;     
         return output_string;
     }
-    public static delete_query_builder(id: number){
+    public static delete_query_builder(id: string){
         return 'DELETE from devbox.events_data where idkey = ' + id;
     }
     public static week_query_builder(): string{
@@ -53,7 +56,6 @@ class query_builders{
         WHERE
         (dateandtime = ` + query_string + ` AND recurring = 0) OR ((MONTH(dateandtime) = ` + mm + ` AND DAY(dateandtime) = ` + dd + `) AND recurring = 1);
         `
-        console.log(output_string);
         return output_string;
         
     }

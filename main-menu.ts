@@ -1,18 +1,18 @@
-///<reference path="./event_class.ts" />
-///<reference path="./sql_func.ts" />
-///<reference path="./prompt_func.ts" />
-///<reference path="./add-main.ts" />
-///<reference path="./view-main.ts" />
-///<reference path="./check-main.ts" />
+///<reference path="./libs/event_class.ts" />
+///<reference path="./libs/sql_func.ts" />
+///<reference path="./libs/prompt_func.ts" />
+///<reference path="./libs/add-main.ts" />
+///<reference path="./libs/view-main.ts" />
+///<reference path="./libs/check-main.ts" />
 
-import event_class from './event_class'
-import sql_func from './sql_func'
-import Startup from './add-main'
-import view_main from './view-main'
-import check_func from './check-main'
-import edit from './edit_main'
-import delete_main from './delete-main'
-import output_functions from './output_functions'
+import event_class from './libs/event_class'
+import sql_func from './libs/sql_func'
+import Startup from './libs/add-main'
+import view_main from './libs/view-main'
+import check_func from './libs/check-main'
+import edit from './libs/edit_main'
+import delete_main from './libs/delete-main'
+import output_functions from './libs/output_functions'
 
 declare function require(name: string);
 //adding to console prototype

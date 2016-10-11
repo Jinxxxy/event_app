@@ -1,16 +1,18 @@
 "use strict";
 const date_functions_1 = require('./date_functions');
+var mysql = require('mysql');
 class query_builders {
+    static insert_query_builder(ins_eve) {
+        return "insert into devbox.events_data(dateandtime, type, notes, recurring) values(" + mysql.escape(ins_eve.date) + "," + mysql.escape(ins_eve.type) + "," + mysql.escape(ins_eve.notes) + "," + mysql.escape(ins_eve.recurring) + ")";
+    }
     static update_query_builder(upd_eve) {
-        console.log("Date Func: " + upd_eve.date);
         var pre_string = "UPDATE devbox.events_data SET ";
         var add_date = "dateandtime = " + upd_eve.date + ", ";
-        var add_type = "type = '" + upd_eve.type + "', ";
-        var add_notes = "notes = '" + upd_eve.notes + "', ";
-        var add_recurring = "recurring = " + upd_eve.recurring;
-        var end_string = " WHERE idkey = " + upd_eve.id;
+        var add_type = "type = " + mysql.escape(upd_eve.type) + ", ";
+        var add_notes = "notes = " + mysql.escape(upd_eve.notes) + ", ";
+        var add_recurring = "recurring = " + mysql.escape(upd_eve.recurring);
+        var end_string = " WHERE idkey = " + mysql.escape(upd_eve.id);
         var output_string = pre_string + add_date + add_type + add_notes + add_recurring + end_string;
-        console.log(output_string);
         return output_string;
     }
     static delete_query_builder(id) {
@@ -48,7 +50,6 @@ class query_builders {
         WHERE
         (dateandtime = ` + query_string + ` AND recurring = 0) OR ((MONTH(dateandtime) = ` + mm + ` AND DAY(dateandtime) = ` + dd + `) AND recurring = 1);
         `;
-        console.log(output_string);
         return output_string;
     }
     static month_query_builder() {

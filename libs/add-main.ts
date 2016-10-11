@@ -5,9 +5,10 @@
 declare function require(name: string);
 import event_class from './event_class'
 import sql_func from './sql_func'
-import mainmenu from './main-menu'
+import mainmenu from './../main-menu'
 import date_fnc from './date_functions'
 import result_class from './result_class'
+import query_builder from './query-builders'
 
 // resolve issue to export schema_objects to a separate class file
 var schema_objects = {
@@ -53,17 +54,15 @@ export default class Startup {
                     console.log("Failed");
                     return 0;
                 }
-                var curr = new event_class(date_fnc.dateparser(result['Date(dd-mm-yyyy)']), result['Type(Birthday, Anniversary, Event)'], result['Notes'], event_class.recurring_conv(result['Recurring event? (Y/N)']));
-                console.log(curr);
+                var curr = new event_class(date_fnc.dateparser(result['Date(dd-mm-yyyy)']), result['Type(Birthday, Anniversary, Event)'], result['Notes'], event_class.recurring_conv(result['Recurring event? (Y/N)']));                
                 that.res_data = curr;
                 resolve();
             })
         }).then(function(){
             var id: number;
-            var prom_val = sql_func.insert(Startup.res_data);
+            var prom_val = sql_func.insert(query_builder.insert_query_builder(Startup.res_data));
             prom_val.then(function(idval: result_class){
                 if(idval.err_flag === true){
-                    console.log(idval.err);
                     return;
                 } else {
                     sql_func.retrieve_last(idval.record_id, mainmenu.mainmenu);

@@ -4,7 +4,7 @@
 
 import event_class from './event_class'
 import sql_func from './sql_func'
-import main_menu from './main-menu'
+import main_menu from './../main-menu'
 import check_main from './check-main'
 import output_functions from './output_functions'
 import date_fnc from './date_functions'

@@ -45,7 +45,6 @@ class edit {
                         main_menu_1.default.mainmenu();
                     }
                     else {
-                        console.log(output_functions_1.default.output_event(sql_res[0]));
                         edit.main_edit_event(sql_res[0]);
                     }
                 });

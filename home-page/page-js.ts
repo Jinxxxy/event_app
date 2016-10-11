@@ -1,9 +1,6 @@
-///<reference path="C:\Development\node\events_cli\require.d.ts" />
-///<reference path="C:\Development\node\events_cli\event_class.ts" />
-import event_class from "./../event_class";
-import html_export from "../export-html";
-import filesaver from "./FileSaver";
-import date_func from "./../date_functions";
+///<reference path="C:\Development\node\events_cli\libs\require.d.ts" />
+///<reference path="C:\Development\node\events_cli\libs\event_class.ts" />
+
 var add_button:HTMLElement = document.getElementById('add-button');
 var view_button:HTMLElement = document.getElementById('view-button');
 var edit_button:HTMLElement = document.getElementById('edit-button');
@@ -46,14 +43,24 @@ var operation_output_container: HTMLDivElement = <HTMLDivElement> document.getEl
 var operation_close_button: HTMLInputElement = <HTMLInputElement>document.getElementById("close-output-button");
 var operation_output: HTMLDivElement = <HTMLDivElement>document.getElementById("output-view-id")
 var edit_form_container: HTMLDivElement = <HTMLDivElement> document.getElementById("edit-form-container");
+var edit_reset_button: HTMLDivElement = <HTMLDivElement> document.getElementById("edit-reset-button");
+var edit_delete_button: HTMLDivElement = <HTMLDivElement> document.getElementById("edit-delete-button");
 var base_conn_string = "http://127.0.0.1:3000/";
 var timer_running: boolean = false;
 
+import event_class from "./../libs/event_class";
+import html_export from "./../libs/export-html";
+import filesaver from "./../libs/FileSaver";
+import date_func from "./../libs/date_functions";
+import string_function from "./../libs/string_functions"
+import date_function from "./../libs/date_functions";
 declare var saveAs:any; 
-requirejs(["../event_class"],function(event_class){
+declare var require: any;
+declare var requirejs: any;
+require(["./../libs/event_class"],function(event_class){
     console.log("event_class has been loaded");
 })
-requirejs(["../export-html"],function(html_export){
+requirejs(["./../libs/export-html"],function(html_export){
     console.log("html_export has been loaded");
 })
 requirejs([],function(date_func){
@@ -66,18 +73,22 @@ class button_element_pair{
     constructor(_button: HTMLElement, _view: HTMLElement){
         this.button = _button;
         this.view = _view;
-    }
-    
+    }    
 }
+//Page specific database operations. Heavily integrate with page-only functions. Review overhead of intergrating into sql_functions.ts
 class database_functions{
-    public static update_database(event: event_class, prom_res: Function){
-        var conn = new XMLHttpRequest();
+    public static update_database(event: event_class): Promise<string>{
+        var upd_prom: Promise<string> = new Promise(function(resolve, reject){
+            var conn = new XMLHttpRequest();
             conn.open("POST", base_conn_string + "***ADD-NEW:://" + string_function.create_json_string(event), true);
             conn.onload = function(){
                 form_functions.operation_output(conn.response);
-                prom_res();                              
+                resolve("");                             
             }
             conn.send();
+        })
+        return upd_prom;
+        
     }
     public static get_query_result(query_identifier: string){        
         var prom = new Promise(function(){
@@ -88,8 +99,7 @@ class database_functions{
                     form_functions.display_result(page_functions.view_callback(conn.response));    
                 } else {
                     form_functions.operation_output("No Results To Display");
-                }
-                               
+                }                               
             }
             conn.send();
         })
@@ -141,14 +151,33 @@ class database_functions{
             conn.send();
         })
         return exp_prom;
-    }     
+    }
+    public static delete_event(id: string): Promise<string>{
+        var delete_prom: Promise<string> = new Promise(function(resolve, reject){
+            var conn = new XMLHttpRequest();
+            conn.open("GET", base_conn_string + "***DELETE:://" + id, true);
+            conn.onload = function(){
+                if(conn.response === "1"){
+                    resolve(conn.response)
+                } else {
+                    console.log("END")
+                    reject("Something went wrong. Please restart and try again");
+                }
+            }
+            conn.send();
+        })
+        return delete_prom;
+    }   
 }
+//core functions that affect forms and successful form output.
 class form_functions{
-    public static reset_form(){
-        var reset_items = document.getElementsByClassName("form_items");
+    public static reset_form(form_name: string){
+        var reset_items = document.getElementsByClassName(form_name);
         for(var x in reset_items){
-            var elem: HTMLFormElement = <HTMLFormElement>reset_items[x];
-            elem.reset();
+            if(typeof reset_items[x] !== "number"){
+                var elem: HTMLInputElement = <HTMLInputElement>reset_items[x];
+                elem.value = elem.defaultValue;
+            }
         }
     }
     public static unlock_edit_form(){
@@ -256,56 +285,31 @@ class form_functions{
         }
         
     }
-}
-class string_function{    
-    public static first_letter_to_uppercase(str: string){
-        var first_letter = str.slice(0,1).toUpperCase();
-        var rest_of_string = str.slice(1, str.length);
-        return first_letter + rest_of_string;
-    }    
-    public static create_json_string(event: event_class){
-        
-            var json_string = `            
-            {
-                "event":{
-                    "id":"` + event.id + `",\n
-                    "date":"` + event.date +`",\n
-                    "type":"` + event.type + `",\n
-                    "notes":"` + event.notes + `",\n
-                    "recurring":"` + event.recurring + `"\n                    
-                }
-            }
-            
-            `
-            return json_string;        
-    }
-    public static recurring_number_to_string_option(recurring: string): string{
-        if(recurring === "1"){
-            return "Yes"
-        } else {
-            return "No"
+    //contains the edit-submit-function onclick assignment.
+    public static edit_pick_event(ev_cls: event_class){
+        edit_view.style.display = "block";            
+        edit_form_container.style.display = "block";
+        form_functions.populate_edit_fields(ev_cls);
+        form_functions.unlock_edit_form();
+        edit_event_picker_input.readOnly = true;
+        edit_event_picker_input.style.color = "Red"; 
+        edit_submit_button.onclick = function(){
+            var update_prom: Promise<string> = database_functions.update_record(edit_event_picker_input.value);
+            update_prom.then(function(returned){
+            form_functions.operation_output(returned)
+            edit_form_container.style.display = "block";               
+            })        
         }
-    }         
-}
-class date_function{    
-    public static date_no_separator(date_string: string){
-        while(date_string.indexOf("/") !== -1){
-            date_string = date_string.replace("/", "");           
-        }
-        return date_string;
     }
-    public static get_date_from_date_string(date_string: string): Date{
-        var date_array = date_string.split("/");
-        var return_date = new Date(date_array[2] + "/" + date_array[1] + "/" + date_array[0])
-        return return_date;
+    public static edit_reset_event(){
+        form_functions.reset_form("edit-form-items");
+        edit_event_picker_input.style.color = "black";
+        edit_event_picker_input.value = edit_event_picker_input.defaultValue;
+        edit_event_picker_input.readOnly = false;
+        edit_form_container.style.display = "none";
     }
-    public static get_ddmmyyy_from_date(date_obj: Date):string{
-        var dd:string = date_func.single_date_to_double_date(date_obj.getDate());
-        var mm:string = (date_obj.getMonth() + 1).toString();
-        var yyyy:string = date_obj.getFullYear().toString();
-        return dd + "/" + mm + "/" + yyyy;
-    }  
 }
+//list of specific functions which are implementation for the page.
 class page_functions{
     public static hardcode_array(): button_element_pair[]{
         var add: button_element_pair = new button_element_pair(add_button, add_view);
@@ -371,169 +375,166 @@ class page_functions{
         var blob = new Blob([export_string], {type: "text/plain;charset=utf-8"});
         saveAs(blob, file_name + "." + export_type);
     }
-}
-function on_off(button: HTMLElement) {
-    output_view.style.display = "none";
-    var status = button.style.display;
-    var all_elements: button_element_pair[] = page_functions.hardcode_array();
-    for(var x in all_elements){
-        if(all_elements[x].button !== button){
-            all_elements[x].view.style.display = "none";
-        } else {
-            all_elements[x].view.style.display = "block";
-        }
-    }
-    console.log(getComputedStyle(edit_form_container).display)
-    if(getComputedStyle(edit_form_container).display === "block"){
-        edit_form_container.style.display = "none"
-    }
-}
-(function(){
-    add_button.onclick = function () {
-        on_off(add_button);
-        };
-    view_button.onclick = function () {
-        on_off(view_button);
-        form_functions.clear_output_view();    
-        };
-    edit_button.onclick = function () {
-        on_off(edit_button);
-        };
-    export_button.onclick = function(){
-            on_off(export_button);            
-        }
-    submit_buttom.onclick = function () {
-        var prom = new Promise(function(res, rej){
-           database_functions.update_database(page_functions.data_from_form(add_date_input, add_type_input, add_notes_input,add_recurring_input), res);            
-        }).then(function(){
-                
-        })
-        
-        }
-    view_day_button.onclick = function(){
-        database_functions.get_query_result("QUERY=\"SELECTDAY\"")
-        }
-    view_week_button.onclick = function(){
-        database_functions.get_query_result("QUERY=\"SELECTWEEK\"")
-        }
-    view_month_button.onclick = function(){
-        database_functions.get_query_result("QUERY=\"SELECTMONTH\"")
-        }
-    view_all_button.onclick = function(){
-        database_functions.get_query_result("QUERY=\"SELECTALL\"")        
-        }    
-    json_export_day_button.onclick = function(){
-        database_functions.request_export("***DAY::EXPORT//==//JSON***").then(function(export_string){
-                page_functions.save_file(export_string, "json");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message);
-            });          
-        }
-    json_export_week_button.onclick = function(){
-        database_functions.request_export("***WEEK::EXPORT//==//JSON***").then(function(export_string){
-                page_functions.save_file(export_string, "json");                
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        }
-    json_export_month_button.onclick = function(){
-        database_functions.request_export("***MONTH::EXPORT//==//JSON***").then(function(export_string){
-                page_functions.save_file(export_string, "json");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        }
-    json_export_all_button.onclick = function(){
-        database_functions.request_export("***ALL::EXPORT//==//JSON***").then(function(export_string){
-                page_functions.save_file(export_string, "json");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        }
-    html_export_day_button.onclick = function(){
-        database_functions.request_export("***DAY::EXPORT//==//HTML***").then(function(export_string){
-        page_functions.save_file(export_string, "html");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        } 
-    html_export_week_button.onclick = function(){
-        database_functions.request_export("***WEEK::EXPORT//==//HTML***").then(function(export_string){
-        page_functions.save_file(export_string, "html");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        } 
-    html_export_month_button.onclick = function(){
-        database_functions.request_export("***MONTH::EXPORT//==//HTML***").then(function(export_string){
-        page_functions.save_file(export_string, "html");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        } 
-    html_export_all_button.onclick = function(){
-        database_functions.request_export("***ALL::EXPORT//==//HTML***").then(function(export_string){
-        page_functions.save_file(export_string, "html");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        }
-    xml_export_day_button.onclick = function(){
-        database_functions.request_export("***DAY::EXPORT//==//XML***").then(function(export_string){
-        page_functions.save_file(export_string, "xml");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        }
-    xml_export_week_button.onclick = function(){
-        database_functions.request_export("***WEEK::EXPORT//==//XML***").then(function(export_string){
-        page_functions.save_file(export_string, "xml");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        }
-    xml_export_month_button.onclick = function(){
-        database_functions.request_export("***MONTH::EXPORT//==//XML***").then(function(export_string){
-        page_functions.save_file(export_string, "xml");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        }
-    xml_export_all_button.onclick = function(){
-        database_functions.request_export("***ALL::EXPORT//==//XML***").then(function(export_string){
-        page_functions.save_file(export_string, "xml");
-            }).catch(function(err_message){
-                form_functions.operation_output(err_message)
-            })
-        }
-    edit_pick_submit_button.onclick = function(){
-        var edit_pick_prom: Promise<any> = database_functions.get_edit_event();
-        
-        edit_pick_prom.then(function(ev_cls){            
-            edit_view.style.display = "block";
-            
-                edit_form_container.style.display = "block";
-            form_functions.populate_edit_fields(ev_cls);
-            form_functions.unlock_edit_form();
-            edit_submit_button.onclick = function(){
-                var update_prom: Promise<string> = database_functions.update_record(edit_event_picker_input.value);
-                update_prom.then(function(returned){
-                form_functions.operation_output(returned)
-                edit_form_container.style.display = "block";
-                
-                
-        })
-        
+    public static on_off(button: HTMLElement) {
+        output_view.style.display = "none";
+        var status = button.style.display;
+        var all_elements: button_element_pair[] = page_functions.hardcode_array();
+        for(var x in all_elements){
+            if(all_elements[x].button !== button){
+                all_elements[x].view.style.display = "none";
+            } else {
+                all_elements[x].view.style.display = "block";
             }
-        });
-        edit_pick_prom.catch(function(err_message){
-            
-            form_functions.operation_output(err_message);
-        })
         }
-    operation_close_button.onclick = function(){
-        operation_output_container.style.display = "none"
-        operation_output.innerText = "";
+        if(getComputedStyle(edit_form_container).display === "block"){
+            edit_form_container.style.display = "none"
+        }
     }
+    public static page_init(){
+        add_button.onclick = function () {
+            page_functions.on_off(add_button);
+            };
+        view_button.onclick = function () {
+            page_functions.on_off(view_button);
+            form_functions.clear_output_view();    
+            };
+        edit_button.onclick = function () {
+            page_functions.on_off(edit_button);
+            };
+        export_button.onclick = function(){
+            page_functions.on_off(export_button);            
+            }
+        submit_buttom.onclick = function () {
+            var prom = database_functions.update_database(page_functions.data_from_form(add_date_input, add_type_input, add_notes_input,add_recurring_input));            
+            prom.then(function(res){
+                form_functions.reset_form("form_items");
+            })
+            
+            }
+        view_day_button.onclick = function(){
+            database_functions.get_query_result("QUERY=\"SELECTDAY\"")
+            }
+        view_week_button.onclick = function(){
+            database_functions.get_query_result("QUERY=\"SELECTWEEK\"")
+            }
+        view_month_button.onclick = function(){
+            database_functions.get_query_result("QUERY=\"SELECTMONTH\"")
+            }
+        view_all_button.onclick = function(){
+            database_functions.get_query_result("QUERY=\"SELECTALL\"")        
+            }    
+        json_export_day_button.onclick = function(){
+            database_functions.request_export("***DAY::EXPORT//==//JSON***").then(function(export_string){
+                    page_functions.save_file(export_string, "json");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message);
+                });          
+            }
+        json_export_week_button.onclick = function(){
+            database_functions.request_export("***WEEK::EXPORT//==//JSON***").then(function(export_string){
+                    page_functions.save_file(export_string, "json");                
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            }
+        json_export_month_button.onclick = function(){
+            database_functions.request_export("***MONTH::EXPORT//==//JSON***").then(function(export_string){
+                    page_functions.save_file(export_string, "json");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            }
+        json_export_all_button.onclick = function(){
+            database_functions.request_export("***ALL::EXPORT//==//JSON***").then(function(export_string){
+                    page_functions.save_file(export_string, "json");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            }
+        html_export_day_button.onclick = function(){
+            database_functions.request_export("***DAY::EXPORT//==//HTML***").then(function(export_string){
+            page_functions.save_file(export_string, "html");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            } 
+        html_export_week_button.onclick = function(){
+            database_functions.request_export("***WEEK::EXPORT//==//HTML***").then(function(export_string){
+            page_functions.save_file(export_string, "html");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            } 
+        html_export_month_button.onclick = function(){
+            database_functions.request_export("***MONTH::EXPORT//==//HTML***").then(function(export_string){
+            page_functions.save_file(export_string, "html");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            } 
+        html_export_all_button.onclick = function(){
+            database_functions.request_export("***ALL::EXPORT//==//HTML***").then(function(export_string){
+            page_functions.save_file(export_string, "html");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            }
+        xml_export_day_button.onclick = function(){
+            database_functions.request_export("***DAY::EXPORT//==//XML***").then(function(export_string){
+            page_functions.save_file(export_string, "xml");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            }
+        xml_export_week_button.onclick = function(){
+            database_functions.request_export("***WEEK::EXPORT//==//XML***").then(function(export_string){
+            page_functions.save_file(export_string, "xml");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            }
+        xml_export_month_button.onclick = function(){
+            database_functions.request_export("***MONTH::EXPORT//==//XML***").then(function(export_string){
+            page_functions.save_file(export_string, "xml");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            }
+        xml_export_all_button.onclick = function(){
+            database_functions.request_export("***ALL::EXPORT//==//XML***").then(function(export_string){
+            page_functions.save_file(export_string, "xml");
+                }).catch(function(err_message){
+                    form_functions.operation_output(err_message)
+                })
+            }
+        edit_pick_submit_button.onclick = function(){
+            var edit_pick_prom: Promise<any> = database_functions.get_edit_event();        
+            edit_pick_prom.then(function(ev_cls){            
+                form_functions.edit_pick_event(ev_cls);
+            });
+            edit_pick_prom.catch(function(err_message){
+                
+                form_functions.operation_output(err_message);
+            })
+            }
+        edit_reset_button.onclick = function(){
+            form_functions.edit_reset_event();
+            }
+        operation_close_button.onclick = function(){
+            operation_output_container.style.display = "none"
+            operation_output.innerText = "";
+            }
+        edit_delete_button.onclick = function(){
+            var delete_prom: Promise<string> = database_functions.delete_event(edit_event_picker_input.value);
 
-    })()
+            delete_prom.then(function(response){
+                form_functions.operation_output(response + " rows affected. Event ID: " + edit_event_picker_input.value + " has been deleted");
+                form_functions.edit_reset_event();
+            })
+            delete_prom.catch(function(err){
+                form_functions.operation_output(err);
+            })
+        }
+    }
+}
+page_functions.page_init();

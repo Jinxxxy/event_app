@@ -4,7 +4,7 @@
 
 import event_class from './event_class'
 import sql_func from './sql_func'
-import main_menu from './main-menu'
+import main_menu from './../main-menu'
 import query_builders from './query-builders'
 import string_functions from './string_functions'
 import output_functions from './output_functions'
@@ -81,8 +81,7 @@ class edit{
                     if(Object.keys(sql_res).length < 1){
                         output_functions.console_log("No record found! Please check ID");
                         main_menu.mainmenu();
-                    } else {                      
-                        console.log(output_functions.output_event(sql_res[0]));                  
+                    } else {                  
                         edit.main_edit_event(sql_res[0]);
                     }
                 })

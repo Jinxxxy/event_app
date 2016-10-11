@@ -1,6 +1,6 @@
 import sql_func from './sql_func';
 import event_class from './event_class';
-import main_menu from './main-menu';
+import main_menu from './../main-menu';
 declare function require(name: string);
 
 class export_to_json{

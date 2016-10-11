@@ -1,0 +1,21 @@
+Read me notes: 
+
+cli version:-
+
+main-menu compile script
+tsc -module commonjs -target es6 main-menu
+
+page-js compile script
+tsc -module amd -target es6 home-page/page-js
+
+server compile script
+tsc -module commonjs -target es6 home-page/server/server
+
+--------------------------------------------------------
+
+Features to consider for development: 
+
+-ping server on startup to ensure DB connection
+-table create for first time user(create table script needed)
+-add form and functions to query a specific date. 
+-import from xml, json and possibly HTML

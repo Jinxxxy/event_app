@@ -1,7 +1,8 @@
 //import sql_func from './sql_func';
-///<reference path="C:\Development\node\events_cli\event_class.ts" />
+///<reference path="C:\Development\node\events_cli\libs\event_class.ts" />
 import event_class from './event_class';
-//import main_menu from './main-menu';
+//import main_menu from './..main-menu';
+declare var require: any;
 
 class export_to_html{
     private static pre_html: string = `

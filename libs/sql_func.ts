@@ -22,7 +22,6 @@ export default class sql_func{
                 )
                 class_arr.push(tmp_cls);
             }
-            console.log(class_arr);
             return class_arr;
         } else if(Object.keys(result_arr).length === 0) {
             console.log("No results to return. Please check parameters");
@@ -55,11 +54,11 @@ export default class sql_func{
         return prom;
         ;
     }        
-    public static insert(event: event_class): Promise<result_class> {
+    public static insert(query_string: string): Promise<result_class> {
         var return_id: number;
         var connection = this.create_connection();
         var prom = new Promise(function(res, rej){
-            connection.query("insert into devbox.events_data(dateandtime, type, notes, recurring) values('" + event.date + "', '" + event.type + "', \"" + event.notes + '", "' + event.recurring + '");', {title: 'test'}, function(err, result) {
+            connection.query(query_string, {title: 'test'}, function(err, result) {
                 if (err){
                     connection.end(function(err){
                         
@@ -98,21 +97,17 @@ export default class sql_func{
         var output: Array<event_class> = [];
         var prom = new Promise(function(resolve, reject){
             connection.query(query, function(err, result){
-                console.log("connection-loaded")
                 if(err){
                     var err_obj: result_class = new result_class([], err.message, true, -1);
                     resolve(err_obj);                
                     console.log(err)                    
-                } else {
-                    console.log(result.length)                   
+                } else {                   
                     if(result.length < 1){
-                        console.log("output length = 0")
                         var no_res_obj: result_class = new result_class([], "**//No Results", false)
                         resolve(no_res_obj);
                     } else {
                         var output: Array<event_class> = sql_func.result_to_array(result);
                         var ret_obj: result_class = new result_class(output, "", false);
-                        console.log(ret_obj);
                         resolve(ret_obj);
                     }
                                                      
@@ -151,4 +146,26 @@ export default class sql_func{
         return prom;
         
     }
+    public static delete_query(query: string): Promise<result_class>{
+         var connection = this.create_connection();
+        var prom = new Promise(function(res, rej){
+            
+            connection.query(query, {title: 'test'}, function(err, result) {
+                if (err){
+                    var res_obj: result_class = new result_class([], err.message, true);
+                    res(res_obj);    
+                    connection.end(function(err){
+                        
+                    });          
+                } else {     
+                    connection.end(function(err){});
+                    var res_obj: result_class = new result_class([], result.affectedRows, false)
+                    res(res_obj)                         
+                }  
+                         
+            })
+        })
+        return prom;
+    }
+    
 }

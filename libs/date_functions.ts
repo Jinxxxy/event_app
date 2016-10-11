@@ -35,5 +35,22 @@ class date_fnc{
         var return_string: string = this.single_date_to_double_date(retrieve_val.getDate()) + "/" + this.single_date_to_double_date(retrieve_val.getMonth() + 1) + "/" + retrieve_val.getFullYear().toString();
         return return_string;
     } 
+    public static date_no_separator(date_string: string){
+        while(date_string.indexOf("/") !== -1){
+            date_string = date_string.replace("/", "");           
+        }
+        return date_string;
+    }
+    public static get_date_from_date_string(date_string: string): Date{
+        var date_array = date_string.split("/");
+        var return_date = new Date(date_array[2] + "/" + date_array[1] + "/" + date_array[0])
+        return return_date;
+    }
+    public static get_ddmmyyy_from_date(date_obj: Date):string{
+        var dd:string = this.single_date_to_double_date(date_obj.getDate());
+        var mm:string = (date_obj.getMonth() + 1).toString();
+        var yyyy:string = date_obj.getFullYear().toString();
+        return dd + "/" + mm + "/" + yyyy;
+    }
 }
 export default date_fnc;
